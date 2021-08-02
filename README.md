@@ -10,7 +10,11 @@
 
 另外有的项目代码实在太多了，一下子看懂不可能。于是只好化整为零，把原代码的几小部分实现出来。卡住超过半天的话立马换下一个项目。反正项目多的是。
 
-预计这个项目将会很大，目前已超过200MB了。短时间会超过1GB。我尽量不解压。
+预计这个项目将会很大，所以只收录那些看起来随时会消失的源码。至于看起来经常更新的项目主页，或github上的代码就仅仅给出链接了。
+
+另一个图形学源码收录网站http://kesen.realtimerendering.com/
+
+PaperWithCodes虽然收录了很多论文的源码，但大多都是机器学习方面的。
 
 持续更新维护中...
 
@@ -18,10 +22,9 @@
 
 ### 【Deformation】
 
-[dynamicDeformables]
+**[dynamicDeformables]**
 
-论文名称：**Dynamic Deformables:
-Implementation and Production Practicalities**
+论文名称：Dynamic Deformables: Implementation and Production Practicalities
 
 项目网站：http://www.tkim.graphics/DYNAMIC_DEFORMABLES/
 
@@ -33,7 +36,7 @@ Implementation and Production Practicalities**
 
 构建指南：matlab
 
-[interactive]
+**[interactive]**
 
 论文名称：Interactive Deformation Using Modal Analysis with Constraints
 
@@ -47,7 +50,7 @@ Implementation and Production Practicalities**
 
 构建指南：c++
 
-[]
+**[]**
 
 论文名称：Strain Limiting for Clustered Shape Matching
 
@@ -59,9 +62,35 @@ Implementation and Production Practicalities**
 
 学习指南：还没来得及学
 
+### 【Geometry】
+
+**[Developability]**
+
+论文名称： Developability of Triangle Meshes
+
+项目网站：http://www.cs.cmu.edu/~kmcrane/Projects/DiscreteDevelopable/
+
+源代码：https://github.com/odedstein/DevelopabilityOfTriangleMeshes
+
+构建指南：c++，把本库cmake文件“add_subdirectory("${LIBIGL_INCLUDE_DIR}/../shared/cmake" "libigl")”这一句改成“add_subdirectory("${LIBIGL_INCLUDE_DIR}/../cmake" "libigl")”，然后手工下载libigl库。编译成功但没运行起来
+
+**[trival]**
+
+论文名称： Developability of Triangle Meshes
+
+项目网站：http://www.cs.cmu.edu/~kmcrane/Projects/TrivialConnections/
+
+**[spin]**
+
+论文名称： Spin Transformations of Discrete Surfaces
+
+项目网站：http://www.cs.cmu.edu/~kmcrane/Projects/SpinTransformations/
+
+
+
 ### 【Graphics】
 
-[proceduralShadrBandlimiting]
+**[proceduralShadrBandlimiting]**
 
 论文名称： Approximate Program Smoothing Using Mean-Variance Statistics, with Application to Procedural Shader Bandlimiting
 
@@ -73,9 +102,55 @@ Implementation and Production Practicalities**
 
 构建指南：c++
 
+### 【FiniteElement】
+
+**GUOJIATONG**
+
+《有限元与MTALAB程序设计程序文件》这本书的源代码
+
+**[Prof_C_CarStencen]**
+
+论文名称：****
+
+项目网站： https://www2.mathematik.hu-berlin.de/~cc/cc_homepage/software/software.shtml
+
+值得一看：
+
+源代码：本仓库已收录
+
+构建指南：
+
+学习指南：
+
+**[NodalGalerkin_Book]**
+
+论文名称：Nodal Discontinuous Galerkin Methods Algorithms, Analysis, and Applications by Jan S. Hesthaven, Tim Warburton
+
+项目网站： http://www.tkim.graphics/COMPRESSING/source.html
+
+值得一看：
+
+源代码：本仓库已收录
+
+构建指南：matlab
+
+学习指南：书本的配套源代码，本书有中译本《交点间断Galerkin方法：算法，分析和应用》
+
+**[jburkardt]**
+
+项目网站： https://people.sc.fsu.edu/~jburkardt/m_src/
+
+值得一看：这个网站收录了相当多的代码，比较实用的包括一维谱方法，Galerkin方法
+
+源代码：本仓库已收录
+
+构建指南：matlab
+
+
+
 ### 【FireFlameSmoke】
 
-[compress]
+**[compress]**
 
 论文名称：**Compressing Fluid Subspaces**
 
@@ -91,7 +166,7 @@ Implementation and Production Practicalities**
 
 ### 【FrontTracking】
 
-[skin]
+**[skin]**
 
 论文名称：A Level-set Method for Skinning Animated Particle Data
 
@@ -107,7 +182,7 @@ Implementation and Production Practicalities**
 
 ### 【Image】
 
-[melding]
+**[melding]**
 
 论文名称：**Image Melding: Combining Inconsistent Images**
 **using Patch-based Synthesis**
@@ -159,11 +234,17 @@ Implementation and Production Practicalities**
 
 构建指南：c++，无外部依赖，cmake一遍成功
 
+[]
+
+书籍名称：numerical recipes in c
+
+值得一看：附源代码的书都是好书
+
 ### 【Physics】
 
-[PhysicsBasedAnimation]
+**[PhysicsBasedAnimation]**
 
-论文名称：**An Introduction to Physics-based Animation**
+论文名称：An Introduction to Physics-based Animation
 
 项目网站：https://cal.cs.umbc.edu/Courses/PhysicsBasedAnimation/
 
@@ -175,7 +256,7 @@ Implementation and Production Practicalities**
 
 构建指南：c++，只用了Eigen库，直接拉到Eigen库中去。读取文件的文件名用绝对路径，.json里读取网格的路径也要改成绝对路径。花了一个小时终于搞定。
 
-[]
+**[]**
 
 论文名称：**ARCSim: Adaptive Refining and Coarsening Simulator**
 
@@ -187,9 +268,33 @@ Implementation and Production Practicalities**
 
 构建指南：
 
+**[largeccd]**
+
+论文名称：**A Large Scale Benchmark and an Inclusion-Based Algorithm for Continuous Collision Detection**
+
+项目网站：https://continuous-collision-detection.github.io/
+
+值得一看：
+
+源代码：https://github.com/Continuous-Collision-Detection/Tight-Inclusion
+
+构建指南：
+
+**[exact]**
+
+论文名称：**Efficient Geometrically Exact Continuous Collision Detection**
+
+项目网站：https://www.cs.ubc.ca/~rbridson/
+
+值得一看：
+
+源代码：收录
+
+构建指南：
+
 ### 【Plastic】
 
-[localRemehing]
+**[localRemehing]**
 
 论文名称：**Dynamic Local Remeshing for Elastoplastic Simulation**
 
@@ -201,7 +306,7 @@ Implementation and Production Practicalities**
 
 构建指南：c++，构建非常简单，CMake一遍过，只需解决win10下没用sys/time.h的问题。然而还没解决
 
-[sharpKevlinlets]
+**[sharpKevlinlets]**
 
 论文名称：Sharp Kelvinlets: Elastic Deformations with Cusps and Localized Falloffs
 
@@ -249,7 +354,7 @@ Dynamic Kelvinlets: Secondary Motions based on Fundamental Solutions of Elastody
 
 ### 【WaterFluidFlow】
 
-[eigenFluid]
+**[eigenFluid]**
 
 论文名称：Scalable laplacian eigenfluids.
 
@@ -265,7 +370,7 @@ Dynamic Kelvinlets: Secondary Motions based on Fundamental Solutions of Elastody
 
 相似代码：LaplacianEigen 
 
-[LaplacianEigen]
+**[LaplacianEigen]**
 
 论文名称：Fluid Dynamics using Laplacian Eigenfunctions
 
@@ -288,6 +393,26 @@ Dynamic Kelvinlets: Secondary Motions based on Fundamental Solutions of Elastody
 值得一看：
 
 源代码：本仓库已收录，不过少了许多文件
+
+[**voronoi**]
+
+论文名称：Matching Fluid Simulation Elements to Surface Geometry
+
+项目网站： http://www.cs.ubc.ca/labs/imager/tr/2010/MatchingSimulationToSurface/BBB2010.html
+
+值得一看：
+
+源代码：本仓库已收录
+
+[**acurrateviscosity**]
+
+论文名称：Accurate Viscous Free Surfaces for Buckling, Coiling, and Rotating Liquids
+
+项目网站： http://www.cs.ubc.ca/labs/imager/tr/2008/Batty_ViscousFluids/
+
+值得一看：
+
+源代码：本仓库已收录
 
 # 本仓库收录的代码
 
@@ -325,27 +450,13 @@ Implementation and Production Practicalities**
 
 ### FiniteElement
 
-Prof_C_CarStencen
 
-https://www2.mathematik.hu-berlin.de/~cc/cc_homepage/software/software.shtml
-
-上面有一些不错的有限元论文，均已存至此库
-
-NodalGalerkin_Book
-
-Nodal Discontinuous Galerkin Methods Algorithms, Analysis, and Applications by Jan S. Hesthaven, Tim Warburton 的源代码，本书有中译本《交点间断Galerkin方法：算法，分析和应用》
-
-GUOJIATONG
-
-《有限元与MTALAB程序设计程序文件》这本书的源代码
 
 **cracksDeepBlue**
 
 包括efficient optimization of reliability-constrained structural design problems including interval uncertainty以及Source code for proposed Multi-Scale FEM Crack Growth model 以及Software code for A dynamic discretization method for reliability inference in dynamic bayesian networks的源码
 
-**jburkardt**
 
-https://people.sc.fsu.edu/~jburkardt/m_src/
 
 **mixed**
 
@@ -820,6 +931,12 @@ https://github.com/songrun/SeamAwareDecimater
 
 代码地址：https://github.com/otherlab/fractal
 
+论文名称：You Can Find Geodesic Paths in Triangle Meshes by Just Flipping Edges
+
+项目地址：https://nmwsharp.com/research/flip-geodesics/
+
+代码地址：https://github.com/nmwsharp/potpourri3d#mesh-geodesic-paths
+
 ### Cloth
 
 论文名称：A Wave Optics Based Fiber Scattering Model
@@ -1184,7 +1301,13 @@ ACM Transactions on Graphics 37(4) Article 80 (SIGGRAPH 2018)
 
 http://graphics.berkeley.edu/resources/index.html
 
+http://www.cs.cmu.edu/~kmcrane/ 几十份和几何变形论文代码，慢慢看吧...
+
 https://www.cs.ubc.ca/~rbridson/
+
+https://nmwsharp.com/ 
+
+http://www.cs.columbia.edu/cg/creamystrand/
 
 http://isgwww.cs.uni-magdeburg.de/graphics/#publications
 
@@ -1267,3 +1390,9 @@ http://web.uvic.ca/~teseo/
 https://w2.mat.ucsb.edu/qiaodong/
 
 https://www.physicsbasedanimation.com/resources-courses/
+
+### 没代码但仍然很不错的
+
+http://www-sop.inria.fr/reves/publis/gdindex.php?pg=5
+
+https://sgvr.kaist.ac.kr/~sungeui/
