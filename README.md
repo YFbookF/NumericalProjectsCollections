@@ -4,6 +4,8 @@
 
 我发现，只看论文或书本，很可能绞尽脑汁也想不出到底是怎么实现的，自己写一个甚至可能连大方向都错了。但有了源码参考后，难度瞬间下降90%。如果还能把源码运行起来，那么难度已经约等于零了。至于那些没配套源码的论文或书本，就先暂时当它们不存在了。
 
+顺便吐槽一下，有的论文表面看起来没开源代码，实际上打开项目页就能看到。论文通常由几个作者写成，有的作者在自己网页上没开源，但可能另一个作者却开源了同一篇论文的代码。
+
 有的源码是matlab，运行起来很简单。而有的c++代码依赖各种库，不容易运行起来。而后者才是占这些源码中的多数。很多代码都是论文中实现的简化版。
 
 我学习的方法主要是，把这些c++的,matlab的,julia的,fortran的代码，手工翻译成python代码，也就是用python重写一遍，这样就能理解代码的50%，剩下的数学原理之后再慢慢思考。
@@ -35,6 +37,22 @@ PaperWithCodes虽然收录了很多论文的源码，但大多都是机器学习
 学习指南：*SIGGRAPH Courses, 2020*。先看很不错的Courses Notes再看代码。文风形式很有趣。详细地推导了St. Venant-Kirchhoff 和很多公式。
 
 构建指南：matlab
+
+**[biharmonic]**
+
+论文名称：Biharmonic distance
+
+项目网站：http://www.hakenberg.de/diffgeo/differential_geometry.htm#Spin
+
+源代码：已收录matlab
+
+**[spin]**
+
+论文名称：Spin Transformations of Discrete Surfaces
+
+项目网站：http://www.hakenberg.de/diffgeo/differential_geometry.htm#Spin
+
+源代码：已收录matlab
 
 **[interactive]**
 
@@ -86,7 +104,45 @@ PaperWithCodes虽然收录了很多论文的源码，但大多都是机器学习
 
 项目网站：http://www.cs.cmu.edu/~kmcrane/Projects/SpinTransformations/
 
+**[]**
 
+论文名称：AMS Short Course on Discrete Differential Geometry
+
+项目网站：http://geometry.cs.cmu.edu/ddgshortcourse/index.html
+
+构建指南：javascript，一键运行
+
+**[]**
+
+论文名称：Hexahedral Quality Evaluation via SOS Relaxations
+
+项目网站：https://people.csail.mit.edu/jsolomon/#research
+
+源代码：https://github.com/zoemarschner/SOS-hex
+
+**[]**
+
+论文名称：Dynamical Optimal Transport on Discrete Surfaces
+
+项目网站：https://people.csail.mit.edu/jsolomon/#research
+
+源代码：https://github.com/HugoLav/DynamicalOTSurfaces
+
+**[]**
+
+论文名称：Isometry-Aware Preconditioning for Mesh Parameterization
+
+项目网站：https://people.csail.mit.edu/jsolomon/#research
+
+源代码：https://github.com/sebastian-claici/AKVFParam
+
+**[]**
+
+论文名称："Earth Mover’s Distances on Discrete Surfaces." SIGGRAPH 2014,
+
+项目网站：https://people.csail.mit.edu/jsolomon/#research
+
+源代码：已收录matlab
 
 ### 【Graphics】
 
@@ -141,6 +197,18 @@ PaperWithCodes虽然收录了很多论文的源码，但大多都是机器学习
 项目网站： https://people.sc.fsu.edu/~jburkardt/m_src/
 
 值得一看：这个网站收录了相当多的代码，比较实用的包括一维谱方法，Galerkin方法
+
+源代码：本仓库已收录
+
+构建指南：matlab
+
+**[galerkin0]**
+
+文章地址：Notes on Galerkin methods for incompressible flow simulation. 
+
+项目网站： https://www.mcs.anl.gov/~fischer/me528/
+
+值得一看：配套讲义也在这个网页上
 
 源代码：本仓库已收录
 
@@ -462,9 +530,7 @@ Implementation and Production Practicalities**
 
 Mixed Finite Elements for Variational Surface Modelinghttps://igl.ethz.ch/projects/mixed-fem/
 
-galerkin0
 
-Notes on Galerkin methods for incompressible flow simulation. https://www.mcs.anl.gov/~fischer/me528/
 
 ### Bubble
 
@@ -1205,7 +1271,7 @@ IEEE Transactions on Pattern Analysis and Machine Intelligence (PAMI), 2019
 
 ### FLIP&MPM
 
-论文名称：Lagrangian-Eulerian Multi-Density Topology Optimization with the Material Point Method
+论文名称：Lagrangieyn-eulerian Multi-density topology optimization with the material point method
 
 项目地址：https://www.math.ucla.edu/~minchen/
 
