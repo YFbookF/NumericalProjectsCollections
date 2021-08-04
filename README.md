@@ -362,6 +362,12 @@ PaperWithCodes虽然收录了很多论文的源码，但大多都是机器学习
 
 构建指南：
 
+**[simplediff]
+
+代码地址：https://github.com/BachiLi/diffrender_tutorials
+
+简介：单c++文件，无外部依赖。容易运行。可微分光线追踪。仓库作者的另一仓库也是可微分物理
+
 ### 【Plastic】
 
 **[localRemehing]**
