@@ -308,6 +308,12 @@ PaperWithCodes虽然收录了很多论文的源码，但大多都是机器学习
 
 值得一看：附源代码的书都是好书
 
+[levenberg]
+
+文章名称：The Levenberg-Marquardt algorithm for nonlinear least squares curve-fitting problems  
+
+项目简介：The Levenberg-Marquardt algorithm的matlab实现
+
 ### 【Physics】
 
 **[PhysicsBasedAnimation]**
@@ -332,21 +338,17 @@ PaperWithCodes虽然收录了很多论文的源码，但大多都是机器学习
 
 值得一看：开源的小巧物理模拟软件
 
-源代码：未收录
+[tinydiff]
 
-构建指南：
+代码地址：https://github.com/google-research/tiny-differentiable-simulator
+
+简介：GoogleSearch的可微分物理，不过看不懂究竟在搞啥
 
 **[largeccd]**
 
 论文名称：**A Large Scale Benchmark and an Inclusion-Based Algorithm for Continuous Collision Detection**
 
-项目网站：https://continuous-collision-detection.github.io/
-
-值得一看：
-
 源代码：https://github.com/Continuous-Collision-Detection/Tight-Inclusion
-
-构建指南：
 
 **[exact]**
 
@@ -1291,11 +1293,7 @@ https://www.math.ucla.edu/~cffjiang/publications.html
 
 论文名称：Hierarchical Optimization Time Integration for CFL-rate MPM Stepping
 
-项目地址：https://www.math.ucla.edu/~minchen/
-
-代码地址：https://github.com/littlemine/HOT
-
-论文名称：Silly Rubber: An Implicit Material Point Method for Simulating Non-equilibrated Viscoelastic and Elastoplastic Solids
+Silly Rubber: An Implicit Material Point Method for Simulating Non-equilibrated Viscoelastic and Elastoplastic Solids
 
 项目地址：https://www.math.ucla.edu/~minchen/
 
