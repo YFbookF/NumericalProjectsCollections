@@ -490,6 +490,10 @@ Dynamic Kelvinlets: Secondary Motions based on Fundamental Solutions of Elastody
 
 源代码：本仓库已收录
 
+http://www.cs.columbia.edu/cg/surfaceliquids/
+
+http://www.cs.columbia.edu/cg/surfaceliquids/code/
+
 # 本仓库收录的代码
 
 ### Deformation
@@ -1429,6 +1433,8 @@ http://www.tkim.graphics/
 
 https://www.cwimd.nl/doku.php?id=codes:start
 
+https://people.engr.tamu.edu/schaefer/research/index.html
+
 ### 未成功打开
 
 http://barbic.usc.edu/vega/form.php?VegaFEM-v3.1.zip
@@ -1466,3 +1472,40 @@ https://www.physicsbasedanimation.com/resources-courses/
 http://www-sop.inria.fr/reves/publis/gdindex.php?pg=5
 
 https://sgvr.kaist.ac.kr/~sungeui/
+
+未整理
+
+http://www.cs.columbia.edu/cg/normalmap/index.html
+
+http://www.cs.columbia.edu/cg/mb/ 运动模糊
+
+http://www.cs.cornell.edu/projects/HarmonicFluids/ 水声
+
+https://www.cs.cornell.edu/projects/Sound/proxy/ 噪声
+
+https://cragl.cs.gmu.edu/pixelate/ 奥观海像素画，没卵用
+
+http://www.cs.columbia.edu/cg/ACM/ 需要发邮件申请
+
+http://www.cs.columbia.edu/cg/SC/ 衣物交互
+
+https://cs.uwaterloo.ca/~c2batty/
+
+https://www-ui.is.s.u-tokyo.ac.jp/~takeo/research/cloth/index.html 衣服java语言
+
+https://koyama.xyz/project/ExampleBasedShapeMatching/index.html 弹性
+
+https://koyama.xyz/project/color_unblending/ 图像处理
+
+https://koyama.xyz/project/ViewDependentRodSimulation/index.html 弹性，unity
+
+http://www.cs.columbia.edu/cg/multitracker/
+
+http://www.cs.columbia.edu/cg/liquidhair/ 头发
+
+http://poisson.cs.uwaterloo.ca/stokes/ 流体houdini 插件
+
+http://www.cs.columbia.edu/cg/wetcloth/ 流体加布料
+
+http://www.cs.ubc.ca/research/thinskinelastodynamics/ MAPLE code
+
