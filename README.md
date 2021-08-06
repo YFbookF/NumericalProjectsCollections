@@ -1473,7 +1473,9 @@ http://www-sop.inria.fr/reves/publis/gdindex.php?pg=5
 
 https://sgvr.kaist.ac.kr/~sungeui/
 
-未整理
+http://www.skinning.org/
+
+### 未整理，代码实在太多了，其中很大一部分又运行不起来
 
 http://www.cs.columbia.edu/cg/normalmap/index.html
 
@@ -1509,3 +1511,60 @@ http://www.cs.columbia.edu/cg/wetcloth/ 流体加布料
 
 http://www.cs.ubc.ca/research/thinskinelastodynamics/ MAPLE code
 
+A New MATLAB and Octave Interface to a Popular Magnetics Finite Element Code
+
+https://cragl.cs.gmu.edu/singleimage/
+
+http://masc.cs.gmu.edu/wiki/CVF
+
+https://cragl.cs.gmu.edu/splineskin/
+
+https://www.dgp.toronto.edu/projects/fast-rotation-fitting/
+
+https://www.dgp.toronto.edu/projects/opening-and-closing-surfaces/
+
+https://github.com/rarora7777/VolumetricTruss matlab,居然还要装一堆恶心的库
+
+https://www.dgp.toronto.edu/projects/spectral-coarsening/ matlab
+
+https://www.dgp.toronto.edu/projects/cubic-stylization/
+
+https://cragl.cs.gmu.edu/selfsimilar/
+
+http://www.cs.columbia.edu/cg/nested-cages/
+
+https://www.dgp.toronto.edu/projects/rigid-body-compression/
+
+https://odedstein.com/projects/hessians/
+
+https://www.dgp.toronto.edu/projects/fast-winding-numbers/
+
+https://www.dgp.toronto.edu/projects/paparazzi/
+
+https://www.dgp.toronto.edu/projects/latent-space-dynamics/
+
+https://www.dgp.toronto.edu/projects/michell/
+
+https://www.cs.utah.edu/~ladislav/schuller13local/schuller13local.html
+
+https://www.cs.utah.edu/~ladislav/jacobson12fast/jacobson12fast.html
+
+https://www.cs.utah.edu/~ladislav/schuller13local/schuller13local.html 运行稍微需要一点魄力，因为这是matlab 和 c++ 联合编译的
+
+https://lgg.epfl.ch/code.php
+
+https://simtk.org/search/search.php?srch=&search=search&type_of_search=soft&sort=date&page=0 神奇的仿真软件下载网站，虽然大部分都没什么用
+
+https://www.cs.utah.edu/~ladislav/liu16fast/liu16fast.html
+
+https://www.cs.utah.edu/~ladislav/sahillioglu16detail/sahillioglu16detail.html
+
+https://www.cs.utah.edu/~ladislav/liu17towards/liu17towards.html
+
+https://www.cs.utah.edu/~ladislav/liu13fast/source_code_vs_build.zip
+
+https://www.dgp.toronto.edu/projects/deconstructed-domains/
+
+https://www.dgp.toronto.edu/projects/fast-rotation-fitting/
+
+https://github.com/sgsellan/swept-volumes
