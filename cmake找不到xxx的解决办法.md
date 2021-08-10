@@ -118,3 +118,5 @@ set(TBB_LIBRARIES_DEBUG "E:/software/oneTBB-master/msvc_19.29_cxx_64_md_debug")
 #include <autodiff/forward/eigen.hpp>
 
 恕我直言，我用everything根本就没找到这两个东西
+
+不过嫌cmake 难用的话，直接删掉引用库，在visualStudio里慢慢配置也可以

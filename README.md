@@ -1435,27 +1435,19 @@ https://www.cwimd.nl/doku.php?id=codes:start
 
 https://people.engr.tamu.edu/schaefer/research/index.html
 
+http://www.nobuyuki-umetani.com/
+
+https://koyama.xyz/#Publication
+
 ### 未成功打开
 
 http://barbic.usc.edu/vega/form.php?VegaFEM-v3.1.zip
 
 姓名要填 anonymous
 
-http://www.andyselle.com/
-
-https://ins.uni-bonn.de/project/
-
-https://ins.uni-bonn.de/content/software-main 流体
-
 https://sites.me.ucsb.edu/~fgibou/
 
 http://physbam.stanford.edu/~mlentine/
-
-https://www.ulfhedinn.net/
-
-http://web.stanford.edu/~yxjin/
-
-https://web.stanford.edu/~dansj/
 
 https://research.adobe.com/person/qingnan-zhou/
 
@@ -1568,3 +1560,9 @@ https://www.dgp.toronto.edu/projects/deconstructed-domains/
 https://www.dgp.toronto.edu/projects/fast-rotation-fitting/
 
 https://github.com/sgsellan/swept-volumes
+
+http://graphics.stanford.edu/projects/ccclde/index.htm
+
+https://graphics.cs.kuleuven.be/publications/phdniels/index.html
+
+https://gitlab.com/thin-films-gpu/thin-films-app
