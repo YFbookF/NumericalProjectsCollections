@@ -24,10 +24,16 @@ rhs = np.zeros((Nx * Nx))
 pressure = np.zeros((Nx * Nx))
 
 particleRadius = dx / np.sqrt(2)
-viscosity = np.ones((Nx,Ny))
+
 
 circle = np.array([[0.5,0.5],[0.7,0.5],[0.3,0.35],[0.5,0.7]])
 rad = np.array([0.4,0.1,0.1,0.1])
+
+viscosity = np.ones((Nx,Ny))
+c_vol = np.zeros((Nx,Ny))
+n_vol = np.zeros((Nx,Ny))
+u_vol = np.zeros((Nx,Ny))
+v_vol = np.zeros((Nx,Ny))
 
 particleCount = 8
 particlePos = np.array([[0.801373184,0.419566065],
@@ -239,6 +245,10 @@ def compute_weights():
 def assemble_matrix(substep):
     global Amat
     global rhs
+    
+    Amat[:,:] = 0
+    rhs[:] = 0
+    
     for j in range(1,Nx-1):
         for i in range(1,Nx-1):
             idx = j * Nx + i
@@ -310,13 +320,13 @@ def computeA(i,j,field):
         term += field[idx+Nx] * Amat[idx,4]
     return field[idx] * Amat[idx,0] + term
     
-def cg_solver():
+def cg_solver(x):
     direction = np.zeros((Nx * Nx))
     residual = np.zeros((Nx * Nx))
     for j in range(Nx):
         for i in range(Nx):
             idx = j * Nx + i
-            direction[idx] = rhs[idx] - computeA(i, j,pressure)
+            direction[idx] = rhs[idx] - computeA(i, j,x)
             residual[idx] = direction[idx]
     
     eps = 1e-5
@@ -333,7 +343,7 @@ def cg_solver():
         for j in range(Nx):
             for i in range(Nx):
                 idx = j * Nx + i
-                pressure[idx] = pressure[idx] + alpha * direction[idx]
+                x[idx] = x[idx] + alpha * direction[idx]
                 residual[idx] = residual[idx] - alpha * computeA(i, j, direction)
                 beta += residual[idx] * residual[idx] / ((alpha + eps) * dAd)
         for i in range(Nx * Nx):
@@ -371,6 +381,66 @@ def substract_gradient():
                     v_valid[i,j] = True
             else:
                 v[i,j] = 0
+                
+def computeVolumeFraction(levelset,fraction,origin,subdivision):
+    
+    subdx = 1 / subdivision
+    samplemax = subdivision * subdivision
+    for j in range(Ny):
+        for i in range(Nx):
+            startx = origin[0] + i
+            starty = origin[1] + j
+            incount = 0
+            for subj in range(subdivision):
+                for subi in range(subdivision):
+                    pos = np.array([startx + (subi + 0.5) * subdx,
+                            starty + (subi + 0.5) * subdx])
+                    phival = Interpolate(pos, levelset)
+                    if phival < 0:
+                        incount += 1
+            fraction[i,j] = incount / samplemax
+            
+def compute_viscosity_weights():
+    computeVolumeFraction(liquidphi, c_vol, np.array([-0.5,-0.5]), 2)
+    computeVolumeFraction(liquidphi, n_vol, np.array([-1,-1]), 2)
+    computeVolumeFraction(liquidphi, u_vol, np.array([-1,-0.5]), 2)
+    computeVolumeFraction(liquidphi, v_vol, np.array([-0.5,-1]), 2)
+    
+def assemble_viscosity_matrix():
+    
+    # True 则是固体，False 则是液体
+    u_state = np.zeros((Nx+1,Ny),dtype = bool)
+    v_state = np.zerso((Nx,Ny+1),dtype = bool)
+    
+    for j in range(Nx):
+        for i in range(Nx+1):
+            if i - 1 < 0 or i >= Nx or (solidphi[i,j+1] + solidphi[i,j]) <= 0:
+                u_state[i,j] = True
+            else:
+                u_state[i,j] = False
+                
+    for j in range(Nx+1):
+        for i in range(Nx):
+            if j - 1 < 0 or j >= Nx or (solidphi[i+1,j] + solidphi[i,j]) <= 0:
+                v_state[i,j] = True
+            else:
+                v_state[i,j] = False
+                
+    Amat[:,:] = 0
+    rhs[:] = 0
+    factor = dt / dx / dx
+    for j in range(1,Nx-1):
+        for i in range(1,Nx-1):
+            if u_state[i,j] == True:
+                continue
+            idx = j * Nx + 1
+            rhs[idx] = u_vol[i,j] * u[i,j]
+            Amat[idx,0] = u_vol[i,j]
+            
+            visc_right = v
+                
+    
+    
                                  
 def extrapolate(field,weight):
     
@@ -459,17 +529,21 @@ while(time < timeFinal):
             
         advect_particles(substep)
         
+        compute_liquidphi()     
+        
         advect_grid_velocity(substep)
 
         v[:,:] -= 0.1 # 重力的影响
 
-        compute_liquidphi()        
+        compute_viscosity_weights()
+        
+        assemble_viscosity_matrix()
         
         compute_weights()
         
         assemble_matrix(substep)
         
-        cg_solver()
+        cg_solver(pressure)
         
         pr = np.zeros((Nx,Nx))
         for j in range(Nx):

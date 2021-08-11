@@ -3,7 +3,6 @@ import random
 # https://github.com/christopherbatty/VariationalViscosity2D
 # SCA 2008 paper "Accurate Viscous Free Surfaces[...]" by Batty & Bridson
 # Fluid Ver.
-# 目前的代码解压力泊松方程之前有一点问题
 Nx = 32
 Ny = 32
 dx = 1 / Nx
@@ -16,8 +15,6 @@ v_weights = np.zeros((Nx,Ny+1))
 v_valid = np.zeros((Nx,Ny+1),dtype = bool)
 
 solidphi = np.zeros((Nx+1,Ny+1))
-liquidphi = np.zeros((Nx+1,Ny+1))
-
 
 Amat = np.zeros((Nx * Nx,5)) # 自身，i-1,i+1,j-1,j+1
 rhs = np.zeros((Nx * Nx))
@@ -138,14 +135,14 @@ def cfl():
             maxvel = max(maxvel,abs(v[j,i]))
     return dx / maxvel
 
-def advect_particles(substep):
+def advect_particles():
     for pidx in range(particleCount):
         
         ppos = particlePos[pidx,:]
         vel0 = getVelocity(ppos)
-        ppos1 = ppos + vel0 * substep
+        ppos1 = ppos + vel0 * dt
         vel1 = getVelocity(ppos1)
-        ppos2 = ppos1 + vel1 * substep
+        ppos2 = ppos1 + vel1 * dt
         particlePos[pidx,:] = (ppos + ppos2) / 2
         
         phi = Interpolate(particlePos[pidx,:], solidphi)
@@ -173,7 +170,7 @@ def advect_particles(substep):
             norm = np.sqrt(normal[0]**2 + normal[1]**2)
             particlePos[pidx,:] -= phi * normal / norm
             
-def advect_grid_velocity(substep):
+def advect_grid_velocity():
     global u
     global v
     temp_u = u.copy()
@@ -182,18 +179,18 @@ def advect_grid_velocity(substep):
         for j in range(Ny):
             pos = np.array([i*dx,(j+0.5)*dx])
             vel0 = getVelocity(pos)
-            pos1 = pos - vel0 * substep
+            pos1 = pos - vel0 * dt
             vel1 = getVelocity(pos1)
-            pos2 = pos1 - vel1 * substep
+            pos2 = pos1 - vel1 * dt
             vel2 = getVelocity(pos2)
             temp_u[i,j] = ((vel0 + vel2)/2)[0]
     for i in range(Nx):
         for j in range(Ny+1):
             pos = np.array([(i+0.5)*dx,j*dx])
             vel0 = getVelocity(pos)
-            pos1 = pos - vel0 * substep
+            pos1 = pos - vel0 * dt
             vel1 = getVelocity(pos1)
-            pos2 = pos1 - vel1 * substep
+            pos2 = pos1 - vel1 * dt
             vel2 = getVelocity(pos2)
             temp_v[i,j] = ((vel0 + vel2)/2)[1]
     u = temp_u.copy()
@@ -204,27 +201,7 @@ def in_domain(x,y):
         return False
     return True
 
-def compute_liquidphi():
-    
-    liquidphi[:,:] = 3 * dx
-    
-    for pidx in range(particleCount):
-        ppos = particlePos[pidx,:]
-        ix = int(ppos[0] / dx - 0.5)
-        iy = int(ppos[1] / dx - 0.5)
-        for j in range(iy-2,iy+3):
-            for i in range(ix-2,ix+3):
-                if in_domain(i, j):
-                    pos = np.array([(i + 0.5)*dx,(j+0.5)*dx])
-                    phi_temp = np.sqrt((pos[0] - ppos[0])**2 + (pos[1] - ppos[1])**2) - 1.02*particleRadius
-                    liquidphi[i,j] = min(liquidphi[i,j],phi_temp)
-     
-    for j in range(Nx):
-        for i in range(Ny):
-            if liquidphi[i,j] < 0.5*dx:
-                solidval = (solidphi[i,j] + solidphi[i+1,j] + solidphi[i,j+1] + solidphi[i+1,j+1])/4
-                if solidval < 0:
-                    liquidphi[i,j] = -0.5 * dx
+
 
 def compute_weights():
     
@@ -236,66 +213,39 @@ def compute_weights():
         for j in range(Nx+1):
             v_weights[i,j] = clamp(1 - fractionInside2(solidphi[i+1,j], solidphi[i,j]))
     
-def assemble_matrix(substep):
+def assemble_matrix():
     global Amat
     global rhs
+    Amat[:,:] = 0
+    rhs[:] = 0
+    
     for j in range(1,Nx-1):
         for i in range(1,Nx-1):
             idx = j * Nx + i
-            centre_phi = liquidphi[i,j]
-            if centre_phi < 0:
+            
+            # right
+            term = u_weights[i+1,j] * dt / dx / dx
+            Amat[idx,0] += term
+            Amat[idx,2] -= term
+            rhs[idx] -= u_weights[i+1,j] * u[i+1,j] / dx
                 
-                # right
-                term = u_weights[i+1,j] * substep / dx / dx
-                right_phi = liquidphi[i+1,j]
-                if right_phi < 0: # 在液体区域里
-                    Amat[idx,0] += term
-                    Amat[idx,2] -= term
-                else:
-                    theta = fractionInside2(centre_phi, right_phi)
-                    if theta < 0.01:
-                        theta = 0.01
-                    Amat[idx,0] += term / theta
-                rhs[idx] -= u_weights[i+1,j] * u[i+1,j] / dx
+            # left
+            term = u_weights[i,j] * dt / dx / dx
+            Amat[idx,0] += term
+            Amat[idx,1] -= term
+            rhs[idx] += u_weights[i,j] * u[i,j] / dx
                 
-                # left
-                term = u_weights[i,j] * dt / dx / dx
-                left_phi = liquidphi[i-1,j]
-                if left_phi < 0: # 在液体区域里
-                    Amat[idx,0] += term
-                    Amat[idx,1] -= term
-                else:
-                    theta = fractionInside2(centre_phi, left_phi)
-                    if theta < 0.01:
-                        theta = 0.01
-                    Amat[idx,0] += term / theta
-                rhs[idx] += u_weights[i,j] * u[i,j] / dx
+            # top
+            term = v_weights[i,j+1] * dt / dx / dx
+            Amat[idx,0] += term
+            Amat[idx,4] -= term
+            rhs[idx] -= v_weights[i,j+1] * v[i,j+1] / dx
                 
-                # top
-                term = v_weights[i,j+1] * dt / dx / dx
-                top_phi = liquidphi[i,j+1]
-                if top_phi < 0: # 在液体区域里
-                    Amat[idx,0] += term
-                    Amat[idx,4] -= term
-                else:
-                    theta = fractionInside2(centre_phi, top_phi)
-                    if theta < 0.01:
-                        theta = 0.01
-                    Amat[idx,0] += term / theta
-                rhs[idx] -= v_weights[i,j+1] * v[i,j+1] / dx
-                
-                # bottom
-                term = v_weights[i,j] * dt / dx / dx
-                bottom_phi = liquidphi[i,j-1]
-                if bottom_phi < 0: # 在液体区域里
-                    Amat[idx,0] += term
-                    Amat[idx,3] -= term
-                else:
-                    theta = fractionInside2(centre_phi, bottom_phi)
-                    if theta < 0.01:
-                        theta = 0.01
-                    Amat[idx,0] += term / theta
-                rhs[idx] += v_weights[i,j] * v[i,j] / dx
+            # left
+            term = v_weights[i,j] * dt / dx / dx
+            Amat[idx,0] += term
+            Amat[idx,3] -= term
+            rhs[idx] += v_weights[i,j] * v[i,j] / dx
     
 def computeA(i,j,field):
     idx = j * Nx + i
@@ -341,34 +291,22 @@ def cg_solver():
         
 def substract_gradient():
     
-    u_valid[:,:] = False
-    v_valid[:,:] = False
+    global u
+    global v
     
     for j in range(Nx):
         for i in range(1,Nx):
             idx = j * Nx + i
-            if u_weights[i,j] > 0 and (liquidphi[i,j] < 0 or liquidphi[i-1,j] < 0):
-                theta = 1
-                if liquidphi[i,j] >= 0 or liquidphi[i-1,j] >= 0:
-                    theta = fractionInside2(liquidphi[i-1,j],liquidphi[i,j])
-                    if theta < 0.01:
-                        theta = 0.01
-                    u[i,j] -= dt * (pressure[idx] - pressure[idx-1]) / dx / theta
-                    u_valid[i,j] = True
+            if u_weights[i,j] > 0:
+                u[i,j] -= dt * (pressure[idx] - pressure[idx-1]) / dx 
             else:
                 u[i,j] = 0
     
     for j in range(1,Nx):
         for i in range(Nx):
             idx = j * Nx + i
-            if v_weights[i,j] > 0 and (liquidphi[i,j] < 0 or liquidphi[i,j-1] < 0):
-                theta = 1
-                if liquidphi[i,j] >= 0 or liquidphi[i,j-1] >= 0:
-                    theta = fractionInside2(liquidphi[i,j-1],liquidphi[i,j])
-                    if theta < 0.01:
-                        theta = 0.01
-                    v[i,j] -= dt * (pressure[idx] - pressure[idx-Nx]) / dx / theta
-                    v_valid[i,j] = True
+            if v_weights[i,j] > 0:
+                v[i,j] -= dt * (pressure[idx] - pressure[idx-Nx]) / dx 
             else:
                 v[i,j] = 0
                                  
@@ -383,7 +321,8 @@ def extrapolate(field,weight):
             if weight[i,j] > 0:
                 valid[i,j] = True
     
-    for layer in range(10):
+    
+    for layer in range(100):
         valid_old = valid.copy()
         for j in range(1,ny-1):
             for i in range(1,nx-1):
@@ -444,38 +383,25 @@ for i in range(Nx+1):
         phi1 = np.sqrt((pos[0] - circle[1,0])**2 + (pos[1] -circle[1,1])**2) - rad[1]
         phi2 = np.sqrt((pos[0] - circle[2,0])**2 + (pos[1] -circle[2,1])**2) - rad[2]
         phi3 = np.sqrt((pos[0] - circle[3,0])**2 + (pos[1] -circle[3,1])**2) - rad[3]
-        solidphi[i,j] = phi0
+        solidphi[i,j] = min(min(phi0, phi1), min(phi2, phi3))
             
 particleVelocity = np.array((particleCount,2))
 time = 0
 timeFinal = 1
-dt = 0.002
+dt = 0.005
 while(time < timeFinal):
-    t = 0
-    while(t < dt):
-        substep = cfl()
-        if t + substep > dt:
-            substep = dt - t
             
-        advect_particles(substep)
+        advect_particles()
         
-        advect_grid_velocity(substep)
+        advect_grid_velocity()
 
-        v[:,:] -= 0.1 # 重力的影响
-
-        compute_liquidphi()        
+        v[Nx//2:Nx//2+2,Nx//2] = 10
         
         compute_weights()
         
-        assemble_matrix(substep)
-        
+        assemble_matrix()
+    
         cg_solver()
-        
-        pr = np.zeros((Nx,Nx))
-        for j in range(Nx):
-            for i in range(Nx):
-                idx = j * Nx + i
-                pr[i,j] = rhs[idx]
                 
         substract_gradient()
         
@@ -485,4 +411,4 @@ while(time < timeFinal):
         
         constrain_velocity()
                 
-        t += substep
+        time += dt
