@@ -1,6 +1,6 @@
 import numpy as np
-A = np.array([[1,2,3],[4,5,6],[7,8,9]],dtype = float)
-b = np.array([14,32,50],dtype = float)
+A = np.array([[3,0,1],[0,4,2],[1,2,3]],dtype = float)
+b = np.array([1,0,0],dtype = float)
 nmax = 3
 
 x = np.zeros((nmax)) # 待求解的值

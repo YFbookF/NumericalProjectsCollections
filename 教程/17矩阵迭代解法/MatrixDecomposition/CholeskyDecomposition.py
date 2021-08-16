@@ -3,7 +3,7 @@ from scipy import array, linalg, dot
 # 此为完全Cholesky 分解，相当准确也相当耗时
 # 因此实际会使用不完全Cholesky 分解，不怎么准确但凑合能用，而且非常节省时间
 import numpy as np
-A = np.array([[1,2,4],[2,13,23],[4,23,77]])
+A = np.array([[4,2,4],[2,13,23],[4,23,77]])
 n = 3
 L = np.zeros((n,n))# 修正
 d = np.zeros((n))
