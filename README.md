@@ -1566,3 +1566,9 @@ http://graphics.stanford.edu/projects/ccclde/index.htm
 https://graphics.cs.kuleuven.be/publications/phdniels/index.html
 
 https://gitlab.com/thin-films-gpu/thin-films-app
+
+https://web.cse.ohio-state.edu/~wang.3602/publications.html
+
+http://www.cse.chalmers.se/~marcof/#publications_selected
+
+http://give.zju.edu.cn/en/memberIntro/tm.html 碰撞检测很多
