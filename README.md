@@ -1572,3 +1572,5 @@ https://web.cse.ohio-state.edu/~wang.3602/publications.html
 http://www.cse.chalmers.se/~marcof/#publications_selected
 
 http://give.zju.edu.cn/en/memberIntro/tm.html 碰撞检测很多
+
+https://animation.rwth-aachen.de/person/1/
