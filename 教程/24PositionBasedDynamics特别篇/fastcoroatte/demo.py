@@ -377,13 +377,35 @@ def SolveOptimizationProblem(pos):
                 
             vec[3,:] = (1 - l_omega2) / (1 + l_omega2)
             
-            q = QuatMultiply(quat[i,:,:],vec)
+            quat[i,:,:] = QuatMultiply(quat[i,:,:],vec)
             
-                                 
+        Ro = QuatToRotationMatrix(quat[i,:,:])
+        R1 = Ro[:,0,:] - F1 # 3 X 8 matrix
+        R2 = Ro[:,1,:] - F2
+        R3 = Ro[:,2,:] - F3
+        
+        dx = np.zeros((4,3,8))
+        for j in range(3):
+            for k in range(8):
+                dx[0,j,k] = (R1[j,k]*Dt[i*8+k,0,0] + R2[j,k]*Dt[i*8+k,0,1] + R3[j,k]*Dt[i*8+k,0,2])*Kreal[i*8+k]
+                dx[1,j,k] = (R1[j,k]*Dt[i*8+k,1,0] + R2[j,k]*Dt[i*8+k,1,1] + R3[j,k]*Dt[i*8+k,1,2])*Kreal[i*8+k]
+                dx[2,j,k] = (R1[j,k]*Dt[i*8+k,2,0] + R2[j,k]*Dt[i*8+k,2,1] + R3[j,k]*Dt[i*8+k,2,2])*Kreal[i*8+k]
+                dx[3,j,k] = (R1[j,k]*Dt[i*8+k,3,0] + R2[j,k]*Dt[i*8+k,3,1] + R3[j,k]*Dt[i*8+k,3,2])*Kreal[i*8+k]
+        
+        for k in range(4):
+            tempx = dx[k,0,:]
+            tempy = dx[k,1,:]
+            tempz = dx[k,2,:]
+            for j in range(8):
+                if (i*8 + j >= num_ele):
+                    break
+                pi = element4[8*i+j,k]
+                if pi < nFixedVertices:
+                    continue
+                rhs[pi - nFixedVertices] += np.array([tempx[j],tempy[j],tempz[j],tempx[j],
+                                                      tempy[j],tempz[j],tempx[j],tempy[j]])
                 
-            test = 1
-    
-            
+    # solveOptimizationProblem 第二步：
         
 time = 0
 dt = 0.01

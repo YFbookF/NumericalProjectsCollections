@@ -1485,8 +1485,6 @@ http://www.cs.columbia.edu/cg/SC/ 衣物交互
 
 https://cs.uwaterloo.ca/~c2batty/
 
-https://www-ui.is.s.u-tokyo.ac.jp/~takeo/research/cloth/index.html 衣服java语言
-
 https://koyama.xyz/project/ExampleBasedShapeMatching/index.html 弹性
 
 https://koyama.xyz/project/color_unblending/ 图像处理
