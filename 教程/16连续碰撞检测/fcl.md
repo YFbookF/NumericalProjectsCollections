@@ -40,7 +40,7 @@ selfccd 算三次函数根的方式是，二分插值+牛顿迭代，并且把�
 
 deformcd 里的 tri_contact 里有个自称very robust triangle intersection test的算法。
 
-
+lostopos的代码，也是先算出四个时间分割节点【两两相邻时间节点之间可能碰撞】cubic_ccd_wrapper
 
 https://web.cse.ohio-state.edu/~wang.3602/publications.html
 
