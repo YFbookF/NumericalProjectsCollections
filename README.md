@@ -1572,3 +1572,5 @@ http://www.cse.chalmers.se/~marcof/#publications_selected
 http://give.zju.edu.cn/en/memberIntro/tm.html 碰撞检测很多
 
 https://animation.rwth-aachen.de/person/1/
+
+http://people.csail.mit.edu/aschulz/optCAD/index.html 200MB的代码...CAD
