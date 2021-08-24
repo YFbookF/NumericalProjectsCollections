@@ -219,3 +219,26 @@ Invertible Isotropic Hyperelasticity using SVD Gradients
 $$
 \bold K = \frac{\partial \bold G}{\partial \bold u} =  \frac{\partial \bold G}{\partial \bold F}\frac{\partial \bold F}{\partial \bold u}=  \frac{\partial \bold P}{\partial \bold F}\bold B_m\frac{\partial \bold F}{\partial \bold u}
 $$
+
+它算得应该是这个
+$$
+\frac{\partial \bold P}{\partial \bold F} =\bold U\{\frac{\partial \bold P}{\partial \bold F}|_{\hat{\bold F}}:\bold U^T \delta \bold F\bold V\}\bold V^T :\delta \bold F
+$$
+
+```
+eiejVector[column] = 1.0;
+    Mat3d ei_ej(eiejVector);
+    Mat3d ut_eiej_v = UT * ei_ej * (Vs[el]);
+    double ut_eiej_v_TeranVector[9]; //in Teran order
+    ut_eiej_v_TeranVector[rowMajorMatrixToTeran[0]] = ut_eiej_v[0][0];
+    ...
+     tempResult += dPdF_atFhat[innerRow * 9 + innerColumn] *
+                      ut_eiej_v_TeranVector[innerColumn];
+      }
+      dPdF_resultVector[teranToRowMajorMatrix[innerRow]] = tempResult;
+      ...
+          Mat3d dPdF_resultMatrix(dPdF_resultVector);
+    Mat3d u_dpdf_vt = (Us[el]) * dPdF_resultMatrix * VT;
+    dPdF[column + 0] = u_dpdf_vt[0][0];
+```
+
