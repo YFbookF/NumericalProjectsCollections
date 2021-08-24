@@ -10,8 +10,10 @@ coord = np.array([[0,0,0],
                   [1,1,1]],dtype = float)
 element = np.zeros((element_num,4))
 element[0,:] = np.array([0,1,2,3])
-
+coord_now = coord.copy()
 for ie in range(element_num):
+    
+    # 以下的坐标为原始坐标，也就是第零帧最开始点的左边，永远无需更新
     m = np.ones((4,4))
     m[0:3,0] = coord[element[ie,0],:]
     m[0:3,1] = coord[element[ie,1],:]
@@ -48,4 +50,18 @@ for ie in range(element_num):
     
     # 刚度矩阵
     K = np.dot(np.dot(B.T,E),B)
+    
+    # 以下的坐标为点的现在坐标
+    p = np.ones((4,4))
+    p[0:3,0] = coord[element[ie,0],:]
+    p[0:3,1] = coord[element[ie,1],:]
+    p[0:3,2] = coord[element[ie,2],:]
+    p[0:3,3] = coord[element[ie,3],:]
+    
+    # deformation gradient 3 x 3 matrix
+    defGrad = np.dot(p[0:3,:],minv[:,0:3])
+    
+    # 假装已经Polar decomposition了
+    R = np.zeros((3,3))
+    S = np.zeros((3,3))
     
