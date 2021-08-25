@@ -1576,3 +1576,5 @@ https://animation.rwth-aachen.de/person/1/
 http://people.csail.mit.edu/aschulz/optCAD/index.html 200MB的代码...CAD
 
 http://solidmechanics.org/FEA.htm 强大的有限元分析matlab
+
+https://www.cs.columbia.edu/cg/codes.php

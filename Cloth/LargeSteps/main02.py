@@ -7,7 +7,7 @@ node_vel = np.zeros((node_num,3))
 
 node_pos = np.array([[0,0,0],
                      [0,1,0],
-                     [1,1,0]],dtype = float)
+                     [1,-1,0]],dtype = float)
 
 element_num = 1
 element = np.zeros((element_num,3))
@@ -22,18 +22,19 @@ def computeW(uv,pos):
     dpos21 = pos[1,:] - pos[0,:]
     dpos31 = pos[2,:] - pos[0,:]
     
-    area = 0.5 * abs(duv21[0]*duv31[1] - duv31[0]*duv21[1])
+    det =  duv21[0]*duv31[1] - duv31[0]*duv21[1]
+    # area = 0.5 * abs(det)
     
-    wu = (dpos21 * duv31[1] - dpos31 * duv21[1]) / (2 * area)
-    wv = (-dpos21 * duv31[0] + dpos31 * duv21[0])/ (2 * area)
+    wu = (dpos21 * duv31[1] - dpos31 * duv21[1]) / det
+    wv = (-dpos21 * duv31[0] + dpos31 * duv21[0])/ det
     
-    dwudx1_scalar = (duv21[1] - duv31[1]) / (2 * area)
-    dwudx2_scalar = duv31[1] / (2 * area)
-    dwudx3_scalar = - duv21[1] / (2 * area)
+    dwudx1_scalar = (duv21[1] - duv31[1]) / det
+    dwudx2_scalar = duv31[1] / det
+    dwudx3_scalar = - duv21[1] / det
     
-    dwvdx1_scalar = (duv21[0] - duv31[0]) / (2 * area)
-    dwvdx2_scalar = - duv31[0] / (2 * area)
-    dwvdx3_scalar = duv21[0] / (2 * area)
+    dwvdx1_scalar = (duv31[0] - duv21[0]) / det
+    dwvdx2_scalar = - duv31[0] / det
+    dwvdx3_scalar = duv21[0] / det
     
     dw = np.array([dwudx1_scalar,
                    dwudx2_scalar,

@@ -8,20 +8,30 @@ class shearCondition:
         self.d = 1
     
     def computeShear(self,wu,wv,dw,pos):
-        dwudx1_scalar = dw[0]
-        dwudx2_scalar = dw[1]
-        dwudx3_scalar = dw[2]
+        dwudx1_scalar = dw[0] # 2 -> 3 . v
+        dwudx2_scalar = dw[1] # 3 -> 1 . v
+        dwudx3_scalar = dw[2] # 1 -> 2
     
-        dwvdx1_scalar = dw[3]
-        dwvdx2_scalar = dw[4]
-        dwvdx3_scalar = dw[5]
+        dwvdx1_scalar = dw[3] # 3 -> 2 . u
+        dwvdx2_scalar = dw[4] # 1 -> 3 . u
+        dwvdx3_scalar = dw[5] # 2 -> 1 . u
+        
+        wu = wu / np.linalg.norm(wu)
+        wv = wv / np.linalg.norm(wv)
         
         self.c = self.alpha * (wu[0]*wv[0] + wu[1]*wv[1] + wu[2]*wv[2])
         
         # Shear Condition 的 一阶导，3x1 矩阵
+        # wu 就是每在本地坐标的u轴走一个单位，那么世界坐标的变化
+        # wv 就是每在本地坐标的v轴走一个单位，那么世界坐标的变化
+        # scalar 只和本地uv有关啊
         self.dcdx1 = self.alpha * (dwudx1_scalar * wv + dwvdx1_scalar * wu)
         self.dcdx2 = self.alpha * (dwudx2_scalar * wv + dwvdx2_scalar * wu)
         self.dcdx3 = self.alpha * (dwudx3_scalar * wv + dwvdx3_scalar * wu)
+        
+        dc1 = self.dcdx1
+        dc2 = self.dcdx2
+        dc3 = self.dcdx3
         
         # Shear Condition 的 二阶导，3x3 矩阵
         self.d2cdx1x1 = self.alpha * 2 * dwudx1_scalar * dwvdx1_scalar * np.identity(3) 
@@ -58,6 +68,10 @@ class shearCondition:
         force[3*idx[0]:3*idx[0]+3] += - self.k * self.c * self.dcdx1
         force[3*idx[1]:3*idx[1]+3] += - self.k * self.c * self.dcdx2
         force[3*idx[2]:3*idx[2]+3] += - self.k * self.c * self.dcdx3
+        
+        dc1 = self.dcdx1
+        dc2 = self.dcdx2
+        dc3 = self.dcdx3
         
         # damping force
         force[3*idx[0]:3*idx[0]+3] += - self.dcdt * self.dcdx1
