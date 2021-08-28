@@ -1,6 +1,5 @@
 stress-strain relations
 $$
-
 \begin{bmatrix} \varepsilon_{x} \\ \varepsilon_{y} \\ \varepsilon_{z} \\ 2\varepsilon_{yz} \\ 2\varepsilon_{xz} \\ 2\varepsilon_{xy}\end{bmatrix} = \frac{1}{E}\begin{bmatrix} 1 & -\nu & -\nu & 0 & 0 & 0 \\ -\nu & 1 & -\nu & 0 & 0 & 0  \\-\nu & -\nu & 1 & 0 &0  & 0  \\ 0 & 0 & 0 & 2(1+\nu) & 0 & 0 \\ 0 & 0& 0 & 0 & 2(1+\nu) & 0  \\0 & 0 & 0& 0 & 0 & 2(1+\nu) \end{bmatrix}\begin{bmatrix} \sigma_{x} \\ \sigma_{y} \\\sigma_{z} \\ \tau_{yz} \\ \tau_{xz} \\ \tau_{xy}\end{bmatrix} 
 $$
 
@@ -69,3 +68,6 @@ void ComputeJacobians()
 }
 ```
 
+记住，我们的核心的任务，就是通过施加在物体的力，计算出每个点的位移。
+
+如果我们想知道每个点的位移，就得知道每个块的应变
