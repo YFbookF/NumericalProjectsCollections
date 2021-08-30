@@ -151,10 +151,10 @@ for ie in range(element_num):
     invE32 = (e10[1]*e20[0] - e10[0]*e20[1]) * invDetE
     invE02 = - invE12 - invE22 - invE32
     
-    element[ie,0,:] = np.array([invE00,invE01,invE02])
-    element[ie,1,:] = np.array([invE10,invE11,invE12])
-    element[ie,2,:] = np.array([invE20,invE21,invE22])
-    element[ie,3,:] = np.array([invE30,invE31,invE32])
+    element_B[ie,0,:] = np.array([invE00,invE01,invE02])
+    element_B[ie,1,:] = np.array([invE10,invE11,invE12])
+    element_B[ie,2,:] = np.array([invE20,invE21,invE22])
+    element_B[ie,3,:] = np.array([invE30,invE31,invE32])
     
 density = 1000
 def calculateMass():
