@@ -42,6 +42,10 @@ def computeEigenVector(A):
     
 
 def svd3x3(A):
+    
+    if abs(A[0,0] * A[1,1] * A[2,2] - np.linalg.det(A)):
+        return np.identity(3),A,np.identity(3)
+    
     AtA = np.dot(A.T,A)
     eigenValue = computeEigenValue(AtA)
     eiv,eivv = np.linalg.eig(AtA)
@@ -63,7 +67,7 @@ def svd3x3(A):
 
 # 初始矩阵
 Amat = np.array([[0,1,1],[1.414,2,0],[0,1,1]])
-
+Amat = np.array([[1,0,0],[0,1,0],[0,0,2]])
 import datetime
 # 奇异值分解
 time0 = datetime.datetime.now()

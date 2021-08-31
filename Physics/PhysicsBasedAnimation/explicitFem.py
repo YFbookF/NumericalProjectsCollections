@@ -106,10 +106,12 @@ def init():
         
 init()
 time = 0
-timeFinal = 8
+timeFinal = 1
 
 
 while(time < timeFinal):
+    
+    time += 1
     
     for p in range(num_particle):
         force[p,:] = 0
