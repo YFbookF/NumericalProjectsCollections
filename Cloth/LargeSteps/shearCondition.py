@@ -7,6 +7,13 @@ class shearCondition:
         self.k = 1
         self.d = 1
     
+    def outterProduct(self,vec0,vec1):
+        res = np.zeros((3,3))
+        res[0,:] = vec0[0] * vec1[:]
+        res[1,:] = vec0[1] * vec1[:]
+        res[2,:] = vec0[2] * vec1[:]
+        return res
+    
     def computeShear(self,wu,wv,dw,pos):
         dwudx1_scalar = dw[0] # 2 -> 3 . v
         dwudx2_scalar = dw[1] # 3 -> 1 . v
@@ -15,9 +22,6 @@ class shearCondition:
         dwvdx1_scalar = dw[3] # 3 -> 2 . u
         dwvdx2_scalar = dw[4] # 1 -> 3 . u
         dwvdx3_scalar = dw[5] # 2 -> 1 . u
-        
-        wu = wu / np.linalg.norm(wu)
-        wv = wv / np.linalg.norm(wv)
         
         self.c = self.alpha * (wu[0]*wv[0] + wu[1]*wv[1] + wu[2]*wv[2])
         
@@ -56,12 +60,7 @@ class shearCondition:
         
         self.dcdt = term1 + term2 + term3
         
-    def outterProduct(self,vec0,vec1):
-        res = np.zeros((3,3))
-        res[0,:] = vec0[0] * vec1[:]
-        res[1,:] = vec0[1] * vec1[:]
-        res[2,:] = vec0[2] * vec1[:]
-        return res
+
         
     def computeShearForce(self,force,dfdx,dfdv,idx):
         # force

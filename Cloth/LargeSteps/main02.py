@@ -6,15 +6,15 @@ node_pos = np.zeros((node_num,3))
 node_vel = np.zeros((node_num,3))
 
 node_pos = np.array([[0,0,0],
-                     [0,1,0],
-                     [1,-1,0]],dtype = float)
+                     [1,0.5,0],
+                     [0.5,1,0]],dtype = float)
 
 element_num = 1
 element = np.zeros((element_num,3))
 element_uv = np.zeros((element_num,3,2))
 element_mass = np.ones((element_num))
 element = np.array([[0,1,2]],dtype = int)
-element_uv[0,:,:] = np.array([[0,0],[0,1],[1,0]],dtype = float)
+element_uv[0,:,:] = np.array([[0,0],[1,0],[0,1]],dtype = float)
 
 def computeW(uv,pos):
     duv21 = uv[1,:] - uv[0,:]
