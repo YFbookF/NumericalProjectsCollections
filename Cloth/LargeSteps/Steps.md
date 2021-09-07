@@ -1,3 +1,9 @@
+Step1 仅有剪切力，无阻尼，显式求解
+
+Step2 仅有剪切力，有阻尼，显式求解
+
+Step4 剪切 加 拉伸，有阻尼，隐式求解，步长5.0也可以。如果显式的话，这个步长已经炸了。 
+
 假设一个一个三角形三个顶点的uv为[0,0],[1,0],[0,1]，可以看出是它初始顶点相对位置。此时我们已经可以计算出
 $$
 \begin{bmatrix} \bold w_u  &\bold w_v \end{bmatrix} = \begin{bmatrix} \bold \Delta x_1  &\bold \Delta x_2 \end{bmatrix}\begin{bmatrix} \Delta u_1 & \Delta u_2\\ \Delta v_1 & \Delta v_2\end{bmatrix}^{-1} = \begin{bmatrix} \bold \Delta x_1  &\bold \Delta x_2 \end{bmatrix}
@@ -174,3 +180,108 @@ $$
 $$
 \nabla (\frac{||\bold e_0||}{||\bold n_0||}) = \nabla(\frac{1}{h_{01}}) = -\frac{\Delta h_{01}}{h_{01}^2}
 $$
+
+求导
+$$
+\nabla (\bold u \cdot \bold v) = \bold u^T \nabla \bold v + \bold v^T \nabla
+$$
+
+bending energy is a function of the square of the mean curvature
+$$
+\nabla ||\bold u|| = \hat{\bold u}^T\nabla \bold u
+$$
+投影
+$$
+\nabla \hat {\bold u} = (I - \hat {\bold u}\hat {\bold u}^T)\frac{\nabla \bold u}{||\bold u||}
+$$
+叉积
+$$
+\nabla (\bold u \times \bold v) = \bold u \times \nabla \bold v - \bold v \times \nabla \bold u
+$$
+
+$$
+\nabla \bold e_{10} = \bold x_1 - \bold x_0 = (-I,I,0,0)\\
+\nabla \bold e_{20} = \bold x_2 - \bold x_0 = (-I,0,I,0)\\
+\nabla \bold e_{12} = \bold x_1 - \bold x_2 = (0,I,-I,0)\\
+\nabla \bold e_{13} = \bold x_1 - \bold x_3 = (0,I,0,I)\\
+\nabla \bold e_{23} = \bold x_1 - \bold x_3 = (0,0,I,I)\\
+$$
+The gradient of the normal with
+respect to a vertex is the outer product of the opposing edge normal with the
+normal itself and scaled with one over the height to the opposing edge.  
+$$
+
+$$
+![image-20210906120252024](D:\图形学书籍\系列流体文章\gif\image-20210906120252024.png)
+
+先来对一个余弦求导，符号下标以ClothSim中的为准，和t的文章中不同。
+
+首先对于
+$$
+\nabla \cos \alpha_{01} = \nabla (\hat {\bold e}_{10} \cdot \hat{\bold e}_{12}) = \hat {\bold e}_{10}\hat{\bold e}_{12}^T + \hat{\bold e}_{12}\hat {\bold e}_{10}^T = \\
+\hat {\bold e}_{10}(1-\hat {\bold e}_{12}\hat {\bold e}_{12}^T)\frac{\nabla {\bold e}_{12}}{|| {\bold e}_{12}||} + \hat {\bold e}_{12}(1-\hat {\bold e}_{10}\hat {\bold e}^T_{10})\frac{\nabla {\bold e}_{10}}{|| {\bold e}_{10}||}
+$$
+还记得单位向量怎么求导吗？再推一遍
+$$
+{\bold e}_{10} = \bold x_1 - \bold x_0 \qquad \frac{\partial {\bold e}_{10}}{\partial \bold x_1} = \bold I \qquad\frac{\partial {\bold e}_{10}}{\partial \bold x_0} = -\bold I\\
+{\bold e}_{12} = \bold x_1 - \bold x_2 \qquad \frac{\partial {\bold e}_{12}}{\partial \bold x_1} = \bold I \qquad\frac{\partial {\bold e}_{12}}{\partial \bold x_2} = -\bold I
+$$
+上面的e是3x1矩阵，I是3x3单位矩阵。那么余弦对各个点求导结果也很好写了
+$$
+\nabla_{\bold x0} \cos \alpha_{01} = - \frac{\hat {\bold e}^T_{12}(1-\hat {\bold e}_{10}\hat {\bold e}_{10}^T)}{||{\bold e}_{10}||}
+$$
+
+
+
+
+```
+d2ThetadP0dP0 = -dn0dP0 / d00 + n0 * dd00dP0.transpose() / (d00 * d00);
+```
+
+$$
+\nabla_{\bold x_0}(\nabla_{\bold x_0}\theta)^T = -\frac{\hat {\bold m}_{00}\hat {\bold n}_0^T + \hat {\bold n}_0\hat {\bold m}_{00}^T}{d_{00}^2}
+$$
+
+对于那篇文章的公式36，下标不同请注意
+
+同样，对对面角求导，那么结果是零。所以本篇公式下面对应参考[1]的公式37
+$$
+\nabla_{\bold x_3}(\nabla_{\bold x_0}\theta)^T = 0
+$$
+
+```
+d2ThetadP0dP3 = -dn0dP3 / d00 + n0 * dd00dP3.transpose() / (d00 * d00) = 0
+```
+
+那么对于第
+$$
+\nabla_{\bold x_0}(\nabla_{\bold x_2}\theta)^T = -\frac{1}{d_{00}d_{01}}(\hat {\bold m}_{00}\hat {\bold n}_0^T - \cos \alpha_{02}\hat {\bold n}_0\hat {\bold m}_{00}^T)
+$$
+
+```
+d2ThetadP0dP1 = -dn0dP1 / d00 + n0 * dd00dP1.transpose() / (d00 * d00);
+```
+
+
+
+对点到对面直线距离求导，就是参考[2]的21页上面那几个公式
+$$
+\nabla_{\bold x_0}h_{00} = -\hat {\bold m}_{00}^T
+$$
+
+$$
+\nabla_{\bold x_1}d_{00} = \frac{d_{00}}{d_{01}}\cos\alpha_{02}\hat {\bold m}_{00}^T
+$$
+
+算了，就当它是这样吧，公式是对的，看不懂代码
+
+```
+dd00dP0 = -b00;
+dd00dP1 = b00 * -v21.dot(v02) / v21.dot(v21);
+```
+
+能这么写的原因是
+$$
+\frac{||\bold v_{02}||}{||\bold v_{21}||} = \frac{d_{00}}{d_{01}} \qquad ||\bold v_{12}|| ||\bold v_{02}||\cos\alpha_{02} = \bold v_{12} \cdot \bold v_{02}
+$$
+推完这个，剩下的就很轻松了
