@@ -286,9 +286,7 @@ void InitArray()
 			duv10 = Vector2f(0, dx);
 			duv20 = Vector2f(dx, 0);
 			float det = 1 / (duv10(0) * duv20(1) - duv10(1) * duv20(0));
-			element_duv[cnt * 2] << duv20(1), -duv20(0),
-				-duv10(1), duv10(0);
-			element_duv[cnt * 2] *= det;
+
 
 			element_dwu[cnt * 2](0) = (duv10(1) - duv20(1)) * det;
 			element_dwu[cnt * 2](1) = duv20(1) * det;
@@ -297,7 +295,9 @@ void InitArray()
 			element_dwv[cnt * 2](0) = (duv20(0) - duv10(0)) * det;
 			element_dwv[cnt * 2](1) = -duv20(0) * det;
 			element_dwv[cnt * 2](2) = duv10(0) * det;
-
+			element_duv[cnt * 2] << duv20(1), -duv20(0),
+				-duv10(1), duv10(0);
+			element_duv[cnt * 2] *= det;
 			duv10 = Vector2f(dx, 0);
 			duv20 = Vector2f(dx, -dx);
 			det = 1 / (duv10(0) * duv20(1) - duv10(1) * duv20(0));
