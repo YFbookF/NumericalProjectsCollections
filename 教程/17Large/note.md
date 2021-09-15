@@ -1,4 +1,4 @@
-### 简介
+## 简介
 
 这篇文章主要记录我对“Large steps in cloth simulation”中公式的理解及推导工程，以及如何用opengl实现这些公式。个人能力有限，没能渲染出很好的效果，但仍然认为这些理解这些公式很重要。
 
@@ -8,7 +8,7 @@ Large steps in cloth simulation 是布料模拟中一篇很经典的论文。这
 
 此外，这篇论文还使用了隐式求解器，即共轭梯度法。隐式方法需要解线性方程组，结果更加稳定，把时间步长，或者力设得很大也能正确求解。这就是能够"Large steps"的原因。
 
-### 形变梯度(deformation gradient)
+## 形变梯度(deformation gradient)
 
 弹性物体最大的特点就是，在一定程度的变形后，还能缓慢恢复成最初始的形状。但是我们怎么衡量物体变形的程度，然后计算出每个节点的速度呢？最简单的就是使用形变梯度。
 $$
@@ -78,19 +78,19 @@ dx20 = p0 - p2
 $$
 \begin{bmatrix} \bold w_u  &\bold w_v \end{bmatrix} = \begin{bmatrix} 1  & 0 \\0  & 1 \\ 0 & 0 \end{bmatrix}
 $$
-这玩意有什么用？可以算为了三角形掰回正常的不形变状态需要的力的大小和方法。如果你足够了解形变梯度，就会发现形变梯度和w矩阵有多么相似了。
+这玩意有什么用？可以算出为了把三角形掰回正常的不形变状态，而需要的力的大小和方法。如果你足够了解形变梯度，就会发现形变梯度和w矩阵有多么相似了。
 
-不过在此之前，我们还需要定义“正常状态”是什么，参考[2]对于此处的讲解，也就是为什么要选形变梯度，为什么线弹性和neohookean模型各有优点等说得非常好。在此简要概述一下。
+不过在此之前，我们还需要定义“正常状态”是什么，参考[2]对于此处的讲解，也就是为什么要选形变梯度，为什么线弹性和neohookean模型各有优点等说得非常好。
 
 就像之前说的，一个三角形最开始的三个顶点坐标分别为[0,0,0],[1,0,0],[0,1,0]，并且一开始处于未形变状态。
 
 如果这个三角形现在的三个顶点坐标分别为[0,0,0],[1,0,0],[0,1,0]，那么它形变了吗？需要添加额外的力把它拉回初始状态吗？显然不需要，因为三个顶点就在原来的位置。
 
-如果这个三角形现在的三个顶点坐标分别为[1,1,0],[2,1,0],[1,2,0]，那么它仅仅是位移了，没形变。
+如果这个三角形现在的三个顶点坐标分别为[1,1,0],[2,1,0],[1,2,0]，那么它仅仅是位移了，没形变。同样不应该添加任何力。
 
 如果这个三角形现在的三个顶点坐标分别为[0,0,0],[0,1,0],[-1,0,0]，那么形变了吗？它确实不在原来的位置，但它的面积/体积并没有变化，仅仅是旋转了90度，所以也不应该添加额外的力。
 
-### Stretch
+## Stretch
 
 如果这个三角形现在的三个顶点坐标分别为[0,0,0],[2,0,0],[0,1,0]，那么它确实形变了，面积变化了，我们的模型应该产生相应的力，把它拉回最初的形状。这里仅仅是第2个顶点拉伸了，我们应该添加一个拉伸力，将第2个顶点拉回来，不过拉回来的力度应该多大？
 
@@ -212,7 +212,7 @@ forces.segment<3>(3 * m_inds[2]) -= k * (q.C0 * q.dC0dP2 + q.C1 * q.dC1dP2);
 
 怎么样，和弹簧质点中的stretch中很不一样吧？如果你还不理解为什么可以由形变梯度算出能量，能量又是怎么和力扯上关系的，那么你需要多阅读一些有限元的书籍和代码，比如尽量把这个维基里的每个词都弄懂https://en.wikipedia.org/wiki/Finite_strain_theory，我弄懂的方法主要是看代码然后纸笔推演了。
 
-### Shear
+## Shear
 
 一个三角形最开始的三个顶点坐标分别为[0,0,0],[1,0,0],[0,1,0]，如果这个三角形现在的三个顶点坐标分别为[0,0,0],[1,0.5,0],[0.5,1,0]，那么W矩阵当然就变成了下面这样。
 $$
@@ -249,7 +249,7 @@ forces.segment<3>(idx2 * 3) += -k_shear * Shear * dcdx2;
 
 为了快速获取正反馈，我们先用显式方法，把两个力加上去。到这里为止的代码文件为step01。不过你想把这个工程运行起来也是需要一番魄力的，因为我用了freeglut,glew库，以及数学运算库eigen。【所以像taichi这样可以一键运行的真是yyds】
 
-### 阻尼
+## 阻尼
 
 阻尼在运动方程中非常常见，通常和速度有关，速度越大阻尼越大，以其将速度减少。如果不加阻尼，现在你会看到物体一直在来回移动，丝毫没有停下来的意思。阻尼也是一种力，所以可以直接将结果加到力上。阻尼计算公式如下
 $$
@@ -286,7 +286,7 @@ forces.segment<3>(idx2 * 3) += -damping_shear * dcdt * dcdx2;
 
 至此的代码文件为Step02。
 
-### 隐式步骤
+## 隐式步骤
 
 广义动力学公式如下
 $$
@@ -400,13 +400,13 @@ K是稀疏矩阵，所以我们显然不可能以稠密矩阵的方式存它，�
 
 笔者自己用的是另一种，既然K最多只有21列，并且编号和相对位置是固定的，那我直接把这21列存下了。比较方便。这种方法在taichi库的cg_poisson.py也能见到。
 
-### 共轭梯度
+## 共轭梯度
 
 共轭梯度请看这篇。这篇论文用了Modified Precondition Conjugate Gradient，笔者只实现了Conjugate Gradient。
 
 至此的代码的文件可见
 
-### Bend
+## Bend
 
 很高兴你读到了这里，接下来我们只要把bend力算出来，整个物理公式计算部分就完成了。必须隆重介绍了参考[5]，里面很详细地介绍了Bend的各项是怎么推导出来。
 
@@ -430,6 +430,336 @@ $$
 \hat{\bold u} \cdot \bold v = ||\bold v||\cos \alpha_{uv}
 $$
 所以有的公式推导着推导着突然少了一项，就是因为这个原因。
+
+接下来，我们的目标是，算角度对顶点位置的一次导，角度对顶点位置的二次导，角度对顶点速度的一次导，最终目标是算出力对顶点位置求导，力对顶点速度求导，用于组装到刚度矩阵中去。如果你丝毫不知道从哪里开始算起的话，那么下面的内容就是为你准备的。
+
+这部分的内容属于离散微分几何(discrete differentia geometry)，所以如果你去找《微分几何》或者《张量分析》是找不到任何有用的东西的。
+
+碳基生物喜欢模块化的东西，所以接下来我们一步一步来拆解。首先，我们的两个顶点是这样的
+
+```
+                        2---3
+                        | \ |
+                        0---1
+```
+
+参考[5]的顶点编号，边的编号与这篇文章的不同。并且我认为它的下标并不是简洁易懂。
+
+### 第一步：各个边的向量及其单位向量。
+
+```
+v10 = p1 - p0;
+v20 = p2 - p0;
+v23 = p2 - p3;
+v13 = p1 - p3;
+v12 = p1 - p2;
+
+e10 = v10.normalized();
+e20 = v20.normalized();
+e23 = v23.normalized();
+e13 = v13.normalized();
+e12 = v12.normalized();
+```
+
+### 第二步：算余弦和法向量
+
+也是一刀秒掉。
+
+```
+c00 = e10.dot(e20);//c00是指第0个三角中，顶点0的余弦
+c01 = e10.dot(e12);
+c02 = -e20.dot(e12);
+
+c13 = e13.dot(e23);
+c11 = e12.dot(e13);
+c12 = -e23.dot(e12);
+
+n0 = (e12.cross(e10)).normalized();
+n1 = (e23.cross(e12)).normalized();
+```
+
+### 第三步：计算单位化的binormal
+
+也就是和法向量以及切向量都正交的那个家伙。这里的binormal是指在一个三角形里，由三角形某个顶点指向对边的方向。代码可如下写
+
+```
+b00 = (e01 - e21 * (e21.dot(e01))).normalized();
+b01 = (-e01 - e02 * (e02.dot(-e01))).normalized();
+b02 = (-e02 - e01 * (e01.dot(-e02))).normalized();
+
+b13 = (e32 - e21 * (e21.dot(e32))).normalized();
+b12 = (-e32 - e31 * (e31.dot(-e32))).normalized();
+b11 = (-e31 - e32 * (e32.dot(-e31))).normalized();
+```
+
+或者直接叉积也可以，注意方向。要算的结果是由三角形某个顶点指向对边的方向，因此法向量需要在边向量的左边。
+
+```
+b00 = -e12.cross(n0);
+b01 = -e20.cross(n0);
+b02 = e10.cross(n0);
+
+b13 = e12.cross(n1);
+b12 = -e13.cross(n1);
+b11 = e23.cross(n1);
+```
+
+### 第四步：计算顶点到到对边的距离
+
+结果为标量。原理为很简单的向量点积，binormal是单位向量，用字母m表示。字母m上面那个尖代表它是单位向量。
+$$
+\hat {\bold m}_{00}\cdot \bold v_{10} = ||\bold v_{10}||\cos\alpha_{00}
+$$
+
+```
+d00 = b00.dot(v10);//d00是指第0个三角形中，顶点0到对边的距离
+d01 = b01.dot(-v12);
+d02 = b02.dot(-v20);
+
+d11 = b11.dot(-v13);
+d12 = b12.dot(v12);
+d13 = b13.dot(v13);
+```
+
+### 第五步：计算弯曲的Condition
+
+也就是二面角的角度
+$$
+\sin \theta = (\bold n_0 \times \bold n_1)\cdot \bold e_{12}\qquad
+\cos \theta = \bold n_0 \cdot \bold n_1
+$$
+
+```
+Real sinTheta = n1.dot(b00);
+Real cosTheta = n0.dot(n1);
+theta = atan2(sinTheta, cosTheta);
+```
+
+### 第六步：计算法向量对顶点的导数
+
+法向量为单位向量。下面公式的计算结果是3x3的矩阵。
+$$
+\nabla \hat{\bold n} = \nabla (\frac{\bold n}{||\bold n||}) = \bold n\nabla(\frac{1}{||\bold n||}) + \frac{1}{||\bold n||}\nabla \bold n
+$$
+而且
+$$
+\nabla(\frac{1}{||\bold n||}) = -\frac{1}{||\bold n||^2}\nabla(||\bold n||)=\frac{-1}{||\bold n||^2}(\hat{\bold n}^T\nabla \bold n)
+$$
+用上面两个式子化简可得
+$$
+\nabla \hat{\bold n} = (1 - \hat{\bold n}\hat{\bold n}^T)\frac{\nabla \bold n}{||\bold n||}
+$$
+这也是参考[5]第8页第一个公式。这就是将单位法向量求导转换为了对法向量求导。又因为
+$$
+\nabla(\bold n) = \nabla(\bold u \times \bold v) = \frac{\bold u \times \nabla \bold v - \bold v \times \nabla \bold u}{||\bold u \times \bold v||}
+$$
+参考[5]的第九页中间那个公式我看不懂，暂且跳过。总之经过一顿操作可以得到下面的式子
+$$
+\nabla \hat{\bold n} = \frac{(\bold u \times \hat{\bold n})\hat{\bold n}^T \nabla \bold v - (\bold v \times \hat{\bold n})\hat{\bold n}^T \nabla \bold u}{||\bold n||}
+$$
+对于第0个三角形的法向量，它的导数就应该是
+$$
+\nabla \hat{\bold n}_0 = \frac{(\bold e_{12} \times \hat{\bold n}_0)\hat{\bold n}_0^T \nabla \bold e_{10} - (\bold e_{10} \times \hat{\bold n}_0)\hat{\bold n}_0^T \nabla \bold e_{12}}{||\bold n_0||}
+$$
+首先是边的单位向量乘单位法向量再除以法向量长度，可以转换为单位binormal除以距离，如下
+$$
+\frac{(\bold e_{12} \times \hat{\bold n}_0)}{||\bold n_0||} = \frac{||\bold e_0||(\hat{\bold e}_{12} \times \hat{\bold n}_0)}{||\bold n_0||} = -\frac{||\bold e_{12}||\hat {\bold m}_{00}}{||\bold n_0||} = -\frac{\hat {\bold m}_{00}}{h_{00}}
+$$
+这也是参考[2]第17页第一个公式。那么对于第0个三角形的法向量，导数为
+$$
+\nabla \hat{\bold n}_0 =-\frac{\hat {\bold m}_{00}}{h_{00}}\hat{\bold n}_0^T \nabla \bold e_{10} - \frac{\hat {\bold m}_{02}}{h_{01}}\hat{\bold n}_0^T \nabla \bold e_{12}
+$$
+接下来让边的单位向量，对各个顶点求导。再复习一遍
+$$
+\nabla \bold e_{10} = \bold x_1 - \bold x_0 = (-I,I,0,0)\\
+\nabla \bold e_{20} = \bold x_2 - \bold x_0 = (-I,0,I,0)\\
+\nabla \bold e_{12} = \bold x_1 - \bold x_2 = (0,I,-I,0)\\
+\nabla \bold e_{13} = \bold x_1 - \bold x_3 = (0,I,0,-I)\\
+\nabla \bold e_{23} = \bold x_1 - \bold x_3 = (0,0,I,-I)\\
+$$
+那么第0个法向量对第0个顶点求导，e10求导完是-1，e12求导完是0，结果是一个3x3矩阵。
+$$
+\nabla_{\bold x_0}\hat{\bold n}_0 = \frac{\hat{\bold m}_{00}}{d_{00}}\hat{\bold n}_{0}^T
+$$
+第0个法向量对第1个顶点求导，e10求导完是1，e12求导完是1，结果如下
+$$
+\nabla_{\bold x_1}\hat{\bold n}_0 = -\frac{(\hat{\bold m}_{00} + \hat{\bold m}_{02})}{d_{01}}\hat{\bold n}_{0}^T= \frac{\hat{\bold m}_{01}}{d_{01}}\hat{\bold n}_{0}^T
+$$
+对第二个顶点，e10求导完是0，e12求导完是-1，结果如下
+$$
+\nabla_{\bold x_2}\hat{\bold n}_0 = \frac{\hat{\bold m}_{02}}{d_{02}}\hat{\bold n}_{0}^T
+$$
+对于第三个顶点，e10和e12求导完结果都是0。第1个三角形的法向量求导同理。写成代码如下
+
+```
+dn0dx0 = b00 * n0.transpose() / d00;
+dn0dx1 = b01 * n0.transpose() / d01;
+dn0dx2 = b02 * n0.transpose() / d02;
+dn0dx3 = Matrix3::Zero();
+
+dn1dx0 = Matrix3::Zero();
+dn1dx1 = b11 * n1.transpose() / d11;
+dn1dx2 = b12 * n1.transpose() / d12;
+dn1dx3 = b13 * n1.transpose() / d13;
+```
+
+### 第七步：计算角度对顶点的导数
+
+也就是参考[5]第16页公式(18)~(21)。角度求导公式为
+$$
+\nabla \theta = -\frac{\nabla (\hat{\bold n}_0 \cdot\hat{\bold n}_1)}{\sin \theta}=  -\frac{\hat{\bold n}_0^T \nabla \hat{\bold n}_1 + \hat{\bold n}_1^T\nabla \hat{\bold n}_0}{\sin \theta}
+$$
+法向量求导之前已经推导过了，但是现在我们需要将叉积换个位置，也就是使用公式
+$$
+(\bold u \times \bold v)\cdot \bold w = (\bold w \times \bold u)\cdot \bold v
+$$
+那么就是下面这个
+$$
+-(\hat {\bold n}_0 \times \bold e_{12}) \cdot \hat {\bold n}_1 = (\hat {\bold n}_0 \times \hat {\bold n}_1) \cdot \bold e_{12} = (\hat {\bold e}_{12} \cdot \bold e_{12}) \sin \theta = ||\bold e_{12}||\sin\theta
+$$
+上面这个将sin消去的变换详细请看参考[5]第12~13页的公式。消去后得到下面的公式：
+$$
+\frac{\hat{\bold n}_0^T \nabla \hat{\bold n}_1 }{\sin \theta} = \frac{||\bold e_{12}||\hat{\bold n}_1^T\nabla \bold e_{32} -(\hat{\bold e}_{12} \cdot \bold e_{32})\hat{\bold n}_1^T \nabla \bold e_{12}}{||\bold n_1||}
+$$
+以及
+$$
+\frac{\hat{\bold n}_1^T \nabla \hat{\bold n}_0 }{\sin \theta} = \frac{-||\bold e_{12}||\hat{\bold n}_0^T\nabla \bold e_{20} +(\hat{\bold e}_{12} \cdot \bold e_{20})\hat{\bold n}_0^T \nabla \bold e_{12}}{||\bold n_0||}
+$$
+由因为
+$$
+2A_0 = ||\bold n_0|| = ||\bold e_{12}||d_{00}
+$$
+A0是三角形9的面积。再结合边的单位向量的求导公式。
+$$
+\nabla_{\bold x_0}\theta = -\frac{1}{d_{00}}\hat {\bold n}_0^T \qquad \nabla_{\bold x_3}\theta = -\frac{1}{d_{13}}\hat {\bold n}_1^T
+$$
+
+再结合参考[5]第14~16页的公式，就得到了下面的公式。这玩意推了5页多，实在太多了，所以细节还是请看参考[5]吧。
+$$
+\nabla_{\bold x_1}\theta = \frac{\cos \alpha_{02}}{d_{01}}\hat {\bold n}_0^T + \frac{\cos \alpha_{12}}{d_{11}}\hat {\bold n}_1^T
+$$
+
+$$
+\nabla_{\bold x_2}\theta =\frac{\cos \alpha_{01}}{d_{02}}\hat {\bold n}_0^T + \frac{\cos \alpha_{11}}{d_{12}}\hat {\bold n}_1^T
+$$
+
+```
+dThetadP0 = -n0 / d00;
+dThetadP1 = c02 * n0 / d01 + c12 * n1 / d11;
+dThetadP2 = c01 * n0 / d02 + c11 * n1 / d12;
+dThetadP3 = -n1 / d13;
+```
+
+### 第八步：距离对顶点求导
+
+由于我们算的binormal是顶点到对边的单位向量，所以如果顶点每向沿着法向量的方向移动一个量，必然导致这个点到对边的距离减少这个量点积刚才算出来的binormal
+$$
+\nabla_{\bold x_0}d_{00} = -\hat {\bold m}_{00}^T 
+$$
+举个例子，一个二维三角形三个顶点分部是p0 = [0,0],p1 = [2,0],p2 = [0,2]。那点p0的binormal很明显就是a = [0.707,0.707]。如果这个点移动了b= [0.4,0]，那么这个点离对边的距离，减少了向量b的长度，也就是0.2828。但是巧了，a点积b结果的也是这个值。这种情况就是因为一开始提到的三角形余弦公式。
+
+因此可以说某个点到对边的距离，对这个点求导，结果是这个点的binormal乘上-1。
+
+那么就有人说，如果不移动p0，偏要移动p1，那么随着p1的移动，p0到对边的距离会如何变化？
+
+假如p1移动了一个向量a，我们先让这个这个向量点积点p0的binormal，毕竟如果往别的方向移动的话，是不会增加d00的长度的。
+
+![image-20210906234113096](D:\图形学书籍\系列流体文章\gif\image-20210906234113096.png)
+
+现在已经求出了蓝色虚线的长度，也就是向量a点积binormal的结果，那么与蓝色虚线平行的橙色虚线的长度是多少？那么这样求相似三角形就可以了。很显然，蓝色虚线的长度比橙色虚线的长度，等于d01比图中红色实线的长度，而后者可通过d00乘以cos(角021)求出来，那么就得到了下面这个式子
+$$
+\nabla_{\bold x_1}d_{00} = \frac{d_{00}}{d_{01}}\cos\alpha_{02}\hat {\bold m}_{00}^T
+$$
+剩下移动p2导致的d00的改变也用相似的方法可求得。最后，无论我们如何移动p3，p0到对边的距离都不会有任何改变。所以对其求导结果是0。
+$$
+\qquad \nabla_{\bold x_2}d_{00} = \frac{d_{00}}{d_{02}}\cos\alpha_{01}\hat {\bold m}_{00}^T \qquad \nabla_{\bold x_3}d_{00} = 0
+$$
+这些公式就是参考[5]第21页前4个公式。代码可以这么写
+
+```
+dd00dP0 = -b00;
+dd00dP1 = b00 * -v12.dot(v20) / v12.dot(v12);
+dd00dP2 = b00 * v12.dot(v10) / v12.dot(v12);
+dd00dP3 = Vector3::Zero();
+```
+
+这是因为
+$$
+\frac{-\bold v_{12} \cdot \bold v_{20}}{||\bold v_{12}||^2} =\frac{ \cos \alpha_{02}||\bold v_{12}||||\bold v_{20}||}{||\bold v_{12}||^2}  =\frac{ \cos \alpha_{02}||\bold v_{20}||}{||\bold v_{12}||} 
+$$
+再用一遍三角形余弦定理即可推出上式。
+
+### 第九步：余弦对顶点求导
+
+首先对于微分余弦
+$$
+\nabla \cos \alpha_{01} = \nabla (\hat {\bold e}_{10} \cdot \hat{\bold e}_{12}) = \hat {\bold e}_{10}\hat{\bold e}_{12}^T + \hat{\bold e}_{12}\hat {\bold e}_{10}^T = \\
+\hat {\bold e}_{10}(1-\hat {\bold e}_{12}\hat {\bold e}_{12}^T)\frac{\nabla {\bold e}_{12}}{|| {\bold e}_{12}||} + \hat {\bold e}_{12}(1-\hat {\bold e}_{10}\hat {\bold e}^T_{10})\frac{\nabla {\bold e}_{10}}{|| {\bold e}_{10}||}
+$$
+还记得单位向量怎么求导吗？再推一遍
+$$
+{\bold e}_{10} = \bold x_1 - \bold x_0 \qquad \frac{\partial {\bold e}_{10}}{\partial \bold x_1} = \bold I \qquad\frac{\partial {\bold e}_{10}}{\partial \bold x_0} = -\bold I\\
+{\bold e}_{12} = \bold x_1 - \bold x_2 \qquad \frac{\partial {\bold e}_{12}}{\partial \bold x_1} = \bold I \qquad\frac{\partial {\bold e}_{12}}{\partial \bold x_2} = -\bold I
+$$
+上面的e是3x1矩阵，I是3x3单位矩阵。那么余弦对各个点求导结果也很好写了
+$$
+\nabla_{\bold x0} \cos \alpha_{01} = - \frac{\hat {\bold e}^T_{12}(1-\hat {\bold e}_{10}\hat {\bold e}_{10}^T)}{||{\bold e}_{10}||}
+$$
+
+参考[5]第23页的推导我没看懂。希望有大佬能够解释。经过一番操作，代码可写为如下
+
+```
+	dc01dP0 = -b02 * b00.dot(v10) / v10.dot(v10);
+	dc01dP2 = -b00 * b02.dot(v12) / v12.dot(v12);
+	dc01dP1 = -dc01dP0 - dc01dP2;
+	dc01dP3 = Vector3::Zero();
+
+	dc02dP0 = -b01 * b00.dot(v20) / v02.dot(v20);
+	dc02dP1 = b00 * b01.dot(v12) / v21.dot(v12);
+	dc02dP2 = -dc02dP0 - dc02dP1;
+	dc02dP3 = Vector3::Zero();
+
+	dc11dP0 = Vector3::Zero();
+	dc11dP2 = -b13 * b12.dot(v12) / v21.dot(v12);
+	dc11dP3 = -b12 * b13.dot(v13) / v31.dot(v13);
+	dc11dP1 = -dc11dP2 - dc11dP3;
+
+	dc12dP0 = Vector3::Zero();
+	dc12dP1 = b13 * b11.dot(v12) / v21.dot(v12);
+	dc12dP3 = -b11 * b13.dot(v23) / v32.dot(v23);
+	dc12dP2 = -dc12dP1 - dc12dP3;
+```
+
+### 第十步：求角度对顶点的二阶导
+
+这一步倒很简单。角度对顶点的一次导结果如下：
+
+```
+dThetadP0 = -n0 / d00;
+dThetadP1 = c02 * n0 / d01 + c12 * n1 / d11;
+dThetadP2 = c01 * n0 / d02 + c11 * n1 / d12;
+dThetadP3 = -n1 / d13;
+```
+
+这里面的每个因子都能对顶点再求一遍导，因此我们只需要把这些分部求导就行了，部分代码如下
+
+```
+d2ThetadP0dP0 = -dn0dP0 / d00 + n0 * dd00dP0.transpose() / (d00 * d00);
+d2ThetadP0dP1 = -dn0dP1 / d00 + n0 * dd00dP1.transpose() / (d00 * d00);
+d2ThetadP0dP2 = -dn0dP2 / d00 + n0 * dd00dP2.transpose() / (d00 * d00);
+d2ThetadP0dP3 = -dn0dP3 / d00 + n0 * dd00dP3.transpose() / (d00 * d00);
+
+```
+
+至此，算dfdx和dfdv和force的组件都已经计算完毕，然后组装矩阵即可。
+
+之后只需要亿点点优化和亿点点渲染技巧可以生成漂亮的布料的模拟了。不过我在此时已经打空了大半的血槽，需要好好休息一下了。
+
+### 总结
+
+虽然这种效果现在来看并不惊艳了，但是其中的处理拉伸，剪切，弯曲的算法还是很值得一看。另一个值得一看是隐式求解步骤。
+
+### 参考
 
 [1]Baraff, D. and A. Witkin. “Large steps in cloth simulation.” *Proceedings of the 25th annual conference on Computer graphics and interactive techniques* (1998): n. pag.
 
