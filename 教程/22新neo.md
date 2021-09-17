@@ -1,3 +1,19 @@
+这是一篇未完成的文章，未完成的原因的包括(1)渲染效果太差(2)看不懂隐式积分。
+
+这篇的内容，基本上就是总结了下面三个参考的内容
+
+https://github.com/YuCrazing/Taichi
+
+[1]FEM Simulation of 3D Deformable Solids: A practitioner’s
+guide to theory, discretization and model reduction.  
+
+[2]Dynamic Deformables: Implementation and Production Practicalities  
+
+[3]Invertible Finite Elements For Robust Simulation of Large
+Deformation  
+
+代码在finitelement/femcourse中
+
 为了更好地解释形变模型的选择，下面举一个简单的例子。
 
 布料模拟大部分都和衣服有关，因此直接拿衣服来举例子。比如我为了探索出哪种衣服最适合我，因此买了一衣柜的衣服，大小不同，款式各异，材料不一，比如有不易变形的木质衣服，有形变为各项异性的钢筋混凝土衣服，也有柔软的橡胶衣服，而且它们都是由三角形构成的。
@@ -468,7 +484,3 @@ Matrix3 StableNeoHookean::PK1(const Matrix3& F, const Matrix3& /*U*/, const Matr
 
 
 
-[2]Dynamic Deformables: Implementation and Production Practicalities  
-
-[3]Invertible Finite Elements For Robust Simulation of Large
-Deformation  

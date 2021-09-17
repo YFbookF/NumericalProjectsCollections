@@ -1,0 +1,197 @@
+﻿// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel CSMain
+
+StructuredBuffer<float> node_pos;
+StructuredBuffer<int> element;
+RWStructuredBuffer<float> element_minv;
+RWByteAddressBuffer Kmatrix;
+
+float mu;
+float la;
+int matCol;
+
+float2x2 inverse(float2x2 mat)
+{
+    float det_inv = 1.0 / (mat._11 * mat._22 - mat._12 * mat._21);
+    return float2x2(mat._22 * det_inv, -mat._12 * det_inv, -mat._21 * det_inv, mat._11 * det_inv);
+}
+
+float trace(float2x2 mat)
+{
+    return mat._11 + mat._22;
+}
+
+void atomicAddFloat(RWByteAddressBuffer buf, int idx, float value)
+{
+    uint i_val = asuint(value);
+    uint tmp0 = 0;
+    uint tmp1;
+    // Raw Byte 4 点浮点数对齐
+    uint meidx = idx * 4;
+    while (true)
+    {
+        //如果node_force[idx] == tmp0，
+        //那么tmp1 = node_force[idx], node_force[idx] = i_val
+        //此时tmp0 == tmp1 == 原始值
+        //因为有可能在相加的过程中，别的核也在加，那么自己就被改了
+        //所以除非相等，才保证在自己改动的过程别人没改过
+        //如果不相等，就要更新别人改过后的值，也就是tmp1
+        buf.InterlockedCompareExchange(meidx, tmp0, i_val, tmp1);
+        if (tmp0 == tmp1)
+            break;
+        tmp0 = tmp1;
+        i_val = asuint(value + asfloat(tmp1));
+    }
+}
+
+[numthreads(2,1,1)]
+void CSMain (uint3 id : SV_DispatchThreadID)
+{
+    //D 为2x2矩阵，现在三角形有三个顶点，每个顶点两个维度，那么3x2x2x2 = 24个元素
+    // 如果是三维四面体，那么是4 x 3 x 3 x 3 = 108个元素，其中9个1，9个-1，其余全为零
+    // 不过我们先搞24个元素的
+    // 首先求个导
+    
+    float2x2 dD1_x = float2x2(1, 0, 0, 0);
+    float2x2 dD1_y = float2x2(0, 0, 1, 0);
+    
+    float2x2 dD2_x = float2x2(0, 1, 0, 0);
+    float2x2 dD2_y = float2x2(0, 0, 0, 1);
+   
+    float2x2 dD0_x = dD1_x - dD2_x;
+    float2x2 dD0_y = dD1_y - dD2_y;
+    
+    int idx = id.x * 3;
+    int idx0 = element[idx + 0];
+    int idx1 = element[idx + 1];
+    int idx2 = element[idx + 2];
+    // 虽然存了三维数据，但只对二维有效果
+    float2 p0 = float2(node_pos[idx0 * 3 + 0], node_pos[idx0 * 3 + 1]);
+    float2 p1 = float2(node_pos[idx1 * 3 + 0], node_pos[idx1 * 3 + 1]);
+    float2 p2 = float2(node_pos[idx2 * 3 + 0], node_pos[idx2 * 3 + 1]);
+    idx = id.x * 4;
+    float2x2 p_X_inv = float2x2(element_minv[idx + 0], element_minv[idx + 1], element_minv[idx + 2], element_minv[idx + 3]);
+    float2x2 p_x = float2x2(p1.x - p0.x, p2.x - p0.x, p1.y - p0.y, p2.y - p0.y);
+    float2x2 F = mul(p_x, p_X_inv);
+    
+    //dF 对每个单元来说有3 x 2个（二维三角形）或 4 x 3 个（三维四面体）个矩阵
+    float2x2 dF0dx = mul(dD0_x, p_X_inv);
+    float2x2 dF0dy = mul(dD0_y, p_X_inv);
+    float2x2 dF1dx = mul(dD1_x, p_X_inv);
+    float2x2 dF1dy = mul(dD1_y, p_X_inv);
+    float2x2 dF2dx = mul(dD2_x, p_X_inv);
+    float2x2 dF2dy = mul(dD2_y, p_X_inv);
+    float2x2 F_inv = inverse(F);
+    float2x2 F_inv_T = transpose(inverse(F));
+    float J = max(determinant(F), 0.01);
+
+    float2x2 dP0dx = mu * dF0dx + (mu - la * log(J)) * mul(mul(F_inv_T, transpose(dF0dx)), F_inv_T)
+    - la * trace(mul(F_inv, dF0dx)) * F_inv_T;
+    float2x2 dP0dy = mu * dF0dy + (mu - la * log(J)) * mul(mul(F_inv_T, transpose(dF0dy)), F_inv_T)
+    - la * trace(mul(F_inv, dF0dy)) * F_inv_T;
+    
+    float2x2 dP1dx = mu * dF1dx + (mu - la * log(J)) * mul(mul(F_inv_T, transpose(dF1dx)), F_inv_T)
+    - la * trace(mul(F_inv, dF1dx)) * F_inv_T;
+    float2x2 dP1dy = mu * dF1dy + (mu - la * log(J)) * mul(mul(F_inv_T, transpose(dF1dy)), F_inv_T)
+    - la * trace(mul(F_inv, dF1dy)) * F_inv_T;
+    
+    float2x2 dP2dx = mu * dF2dx + (mu - la * log(J)) * mul(mul(F_inv_T, transpose(dF2dx)), F_inv_T)
+    - la * trace(mul(F_inv, dF2dx)) * F_inv_T;
+    float2x2 dP2dy = mu * dF2dy + (mu - la * log(J)) * mul(mul(F_inv_T, transpose(dF2dy)), F_inv_T)
+    - la * trace(mul(F_inv, dF2dy)) * F_inv_T;
+    
+    float area = 0.5;
+    float2x2 dH0dx = mul(dP0dx, p_X_inv) * area;
+    float2x2 dH0dy = mul(dP0dy, p_X_inv) * area;
+    float2x2 dH1dx = mul(dP1dx, p_X_inv) * area;
+    float2x2 dH1dy = mul(dP1dy, p_X_inv) * area;
+    float2x2 dH2dx = mul(dP2dx, p_X_inv) * area;
+    float2x2 dH2dy = mul(dP2dy, p_X_inv) * area;
+    
+    //第一个顶点
+    int idxx, idxy;
+    //第一维
+    idxx = idx0 * 2 + 0;
+    idxy = idx1 * 2 + 0;
+    atomicAddFloat(Kmatrix, idxx * matCol + idxy, dH0dx._11);
+    idxy = idx1 * 2 + 1;
+    atomicAddFloat(Kmatrix, idxx * matCol + idxy, dH0dx._21);
+    idxy = idx2 * 2 + 0;
+    atomicAddFloat(Kmatrix, idxx * matCol + idxy, dH0dx._12);
+    idxy = idx2 * 2 + 1;
+    atomicAddFloat(Kmatrix, idxx * matCol + idxy, dH0dx._22);
+    idxy = idx0 * 2 + 0;
+    atomicAddFloat(Kmatrix, idxx * matCol + idxy, -dH0dx._11 - dH0dx._12);
+    idxy = idx0 * 2 + 1;
+    atomicAddFloat(Kmatrix, idxx * matCol + idxy, -dH0dx._21 - dH0dx._22);
+    //第一个顶点第二维
+    idxx = idx0 * 2 + 1;
+    idxy = idx1 * 2 + 0;
+    atomicAddFloat(Kmatrix, idxx * matCol + idxy, dH0dy._11);
+    idxy = idx1 * 2 + 1;
+    atomicAddFloat(Kmatrix, idxx * matCol + idxy, dH0dy._21);
+    idxy = idx2 * 2 + 0;
+    atomicAddFloat(Kmatrix, idxx * matCol + idxy, dH0dy._12);
+    idxy = idx2 * 2 + 1;
+    atomicAddFloat(Kmatrix, idxx * matCol + idxy, dH0dy._22);
+    idxy = idx0 * 2 + 0;
+    atomicAddFloat(Kmatrix, idxx * matCol + idxy, -dH0dy._11 - dH0dy._12);
+    idxy = idx0 * 2 + 1;
+    atomicAddFloat(Kmatrix, idxx * matCol + idxy, -dH0dy._21 - dH0dy._22);
+    //第二个顶点第一维
+    idxx = idx1 * 2 + 0;
+    idxy = idx1 * 2 + 0;
+    atomicAddFloat(Kmatrix, idxx * matCol + idxy, dH1dx._11);
+    idxy = idx1 * 2 + 1;
+    atomicAddFloat(Kmatrix, idxx * matCol + idxy, dH1dx._21);
+    idxy = idx2 * 2 + 0;
+    atomicAddFloat(Kmatrix, idxx * matCol + idxy, dH1dx._12);
+    idxy = idx2 * 2 + 1;
+    atomicAddFloat(Kmatrix, idxx * matCol + idxy, dH1dx._22);
+    idxy = idx0 * 2 + 0;
+    atomicAddFloat(Kmatrix, idxx * matCol + idxy, -dH1dx._11 - dH1dx._12);
+    idxy = idx0 * 2 + 1;
+    atomicAddFloat(Kmatrix, idxx * matCol + idxy, -dH1dx._21 - dH1dx._22);
+    //第二个顶点第二维
+    idxx = idx1 * 2 + 1;
+    idxy = idx1 * 2 + 0;
+    atomicAddFloat(Kmatrix, idxx * matCol + idxy, dH1dy._11);
+    idxy = idx1 * 2 + 1;
+    atomicAddFloat(Kmatrix, idxx * matCol + idxy, dH1dy._21);
+    idxy = idx2 * 2 + 0;
+    atomicAddFloat(Kmatrix, idxx * matCol + idxy, dH1dy._12);
+    idxy = idx2 * 2 + 1;
+    atomicAddFloat(Kmatrix, idxx * matCol + idxy, dH1dy._22);
+    idxy = idx0 * 2 + 0;
+    atomicAddFloat(Kmatrix, idxx * matCol + idxy, -dH1dy._11 - dH1dy._12);
+    idxy = idx0 * 2 + 1;
+    atomicAddFloat(Kmatrix, idxx * matCol + idxy, -dH1dy._21 - dH1dy._22);
+     //第三个顶点第一维
+    idxx = idx2 * 2 + 0;
+    idxy = idx1 * 2 + 0;
+    atomicAddFloat(Kmatrix, idxx * matCol + idxy, dH2dx._11);
+    idxy = idx1 * 2 + 1;
+    atomicAddFloat(Kmatrix, idxx * matCol + idxy, dH2dx._21);
+    idxy = idx2 * 2 + 0;
+    atomicAddFloat(Kmatrix, idxx * matCol + idxy, dH2dx._12);
+    idxy = idx2 * 2 + 1;
+    atomicAddFloat(Kmatrix, idxx * matCol + idxy, dH2dx._22);
+    idxy = idx0 * 2 + 0;
+    atomicAddFloat(Kmatrix, idxx * matCol + idxy, -dH2dx._11 - dH2dx._12);
+    idxy = idx0 * 2 + 1;
+    atomicAddFloat(Kmatrix, idxx * matCol + idxy, -dH2dx._21 - dH2dx._22);
+    idxx = idx2 * 2 + 1;
+    idxy = idx1 * 2 + 0;
+    atomicAddFloat(Kmatrix, idxx * matCol + idxy, dH2dy._11);
+    idxy = idx1 * 2 + 1;
+    atomicAddFloat(Kmatrix, idxx * matCol + idxy, dH2dy._21);
+    idxy = idx2 * 2 + 0;
+    atomicAddFloat(Kmatrix, idxx * matCol + idxy, dH2dy._12);
+    idxy = idx2 * 2 + 1;
+    atomicAddFloat(Kmatrix, idxx * matCol + idxy, dH2dy._22);
+    idxy = idx0 * 2 + 0;
+    atomicAddFloat(Kmatrix, idxx * matCol + idxy, -dH2dy._11 - dH2dy._12);
+    idxy = idx0 * 2 + 1;
+    atomicAddFloat(Kmatrix, idxx * matCol + idxy, -dH2dy._21 - dH2dy._22);
+
+}

@@ -1,0 +1,16 @@
+﻿// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel CSMain
+
+RWByteAddressBuffer KmatrixRaw;
+RWStructuredBuffer<float> Kmat;
+
+float dt;
+float mass;
+int numCol;
+[numthreads(2,1,1)]
+void CSMain (uint3 id : SV_DispatchThreadID)
+{
+    float term = -(KmatrixRaw.Load4(id.x) * dt * dt / mass);
+    term += (id.x % numCol == id.x / numCol);
+    Kmat[id.x] = term;
+}

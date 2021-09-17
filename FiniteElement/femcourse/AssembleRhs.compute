@@ -1,0 +1,16 @@
+﻿// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel CSMain
+
+RWStructuredBuffer<float> RHSmat;
+RWStructuredBuffer<float> Xmat;
+RWStructuredBuffer<float> node_vel;
+
+float dt;
+float mass;
+
+[numthreads(2,1,1)]
+void CSMain (uint3 id : SV_DispatchThreadID)
+{
+    RHSmat[id.x] = node_vel[id.x];
+    Xmat[id.x] = node_vel[id.x] + dt / mass;
+}

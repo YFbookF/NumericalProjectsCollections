@@ -1,0 +1,305 @@
+﻿// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel CSMain
+
+StructuredBuffer<float> node_pos;
+StructuredBuffer<int> element;
+RWStructuredBuffer<float> element_minv;
+RWByteAddressBuffer node_force;
+RWByteAddressBuffer node_normal;
+
+float mu;
+float la;
+float dx;
+float invMass;
+
+float2x2 inverse(float2x2 mat)
+{
+    float det_inv = 1.0 / (mat._11 * mat._22 - mat._12 * mat._21);
+    return float2x2(mat._22 * det_inv, -mat._12 * det_inv, -mat._21 * det_inv, mat._11 * det_inv);
+}
+
+float2x2 transpose(float2x2 mat)
+{
+    return float2x2(mat._11, mat._21, mat._12, mat._22);
+}
+
+float trace(float2x2 mat)
+{
+    return mat._11 + mat._22;
+}
+
+float doubleDotProduct(float2x2 A, float2x2 B)
+{
+    return A._11 * B._11 + A._12 * B._12 + A._21 * B._21 + A._22 * B._22;
+}
+
+float norm2(float2x2 A)
+{
+    return A._11 * A._11 + A._12 * A._12 + A._21 * A._21 + A._22 * A._22;
+}
+
+float2x4 svd(float2x2 A)
+{
+    float term0 = (A._m00 + A._m11) * 0.5;
+    float term1 = (A._m00 - A._m11) * 0.5;
+    float term2 = (A._m10 + A._m01) * 0.5;
+    float term3 = (A._m10 - A._m01) * 0.5;
+    
+    float term4 = sqrt(term0 * term0 + term3 * term3);
+    float term5 = sqrt(term1 * term1 + term2 * term2);
+    
+    float2x2 U = float2x2(1, 0, 0, 1);
+    float2x2 V = float2x2(1, 0, 0, 1);
+    
+    if (term5 < 1e-10)
+    {
+        return float2x4(U, V);
+    }
+    
+    float a1 = atan2(term2, term1);
+    float a2 = atan2(term3, term0);
+    float theta = (a2 - a1) * 0.5, phi = (a2 + a1) * 0.5;
+    
+
+    U._m00 = cos(phi);
+    U._m01 = -sin(phi);
+    U._m10 = sin(phi);
+    U._m11 = cos(phi);
+    
+    V._m00 = cos(theta);
+    V._m01 = -sin(theta);
+    V._m10 = sin(theta);
+    V._m11 = cos(theta);
+    return float2x4(U, V);
+}
+
+float2x2 stvk(float2x2 F, out float energy)
+{
+    float2x2 eye2 = float2x2(1, 0, 0, 1);
+    float2x2 E = (mul(F, transpose(F)) - eye2) * 0.5;
+    energy = doubleDotProduct(E, E) * mu + 0.5 * la * trace(E) * trace(E);
+    float2x2 piola = mul(F, 2 * mu * E + la * trace(E) * eye2);
+    return piola;
+}
+
+float2x2 linearElastic(float2x2 F, out float energy)
+{
+    float2x2 eye2 = float2x2(1, 0, 0, 1);
+    float2x2 vareps = (F + transpose(F)) * 0.5 - eye2;
+    energy = doubleDotProduct(vareps, vareps) * mu + 0.5 * la * trace(vareps) * trace(vareps);
+    float2x2 FI = F - eye2;
+    float2x2 piola = mu * (F + transpose(F) - 2 * eye2) + la * trace(FI) * eye2;
+    return piola;
+}
+
+float2x2 AsRigidAsPossible(float2x2 F, out float energy)
+{
+    float2x4 UVt = svd(F);
+    float2x2 U = UVt._11_12_13_14;
+    float2x2 Vt = UVt._21_22_23_24;
+    float detU = determinant(U);
+    float detV = determinant(Vt);
+    float2x2 L = float2x2(1, 0, 0, determinant(mul(U, Vt)));
+    if (detU < 0 && detV > 0)
+    {
+        U = mul(U, L);
+    }
+    else if (detU > 0 && detV < 0)
+    {
+        Vt = mul(Vt, L);
+    }
+    float2x2 R = mul(U, Vt);
+    float2x2 F_R = norm2(F - R);
+    float2x2 F_R_1 = norm2(inverse(F) - inverse(R));
+    energy = 0.5 * mu * (F_R + F_R_1);
+    float2x2 piola = mu * (F - R);
+    return piola;
+}
+
+float2x2 coratation(float2x2 F, out float energy)
+{
+    float2x4 UVt = svd(F);
+    float2x2 U = UVt._11_12_13_14;
+    float2x2 Vt = UVt._21_22_23_24;
+    float detU = determinant(U);
+    float detV = determinant(Vt);
+    float2x2 L = float2x2(1, 0, 0, determinant(mul(U, Vt)));
+    if (detU < 0 && detV > 0)
+    {
+        U = mul(U, L);
+    }
+    else if (detU > 0 && detV < 0)
+    {
+        Vt = mul(Vt, L);
+    }
+    float2x2 R = mul(U, Vt);
+    float2x2 S = mul(inverse(R), F);
+    float2x2 vareps = S - float2x2(1, 0, 0, 1);
+    energy = mu * doubleDotProduct(vareps, vareps) + 0.5 * la * trace(vareps) * trace(vareps);
+    float2x2 RF_I = mul(transpose(R), F) - float2x2(1, 0, 0, 1);
+    float2x2 piola = 2 * mu * (F - R) + la * trace(RF_I) * R;
+    return piola;
+}
+
+float2x2 neoHookean(float2x2 F, out float energy)
+{
+    float2x2 pJpF = float2x2(F._22, -F._21, -F._12, F._11);
+    float J = max(0.01, determinant(F));
+    float logJ = log(J);
+    float I_c = F._11 * F._11 + F._22 * F._22; //第一Riemman 不变量
+    energy = 0.5 * mu * (I_c - 2) - mu * logJ + 0.5 * la * logJ * logJ;
+    //energy = 1;
+    float2x2 piola = mu * (F - 1.0 / J * pJpF) + la * logJ / J * pJpF;
+    float2x2 F_inv_T = transpose(inverse(F));
+    //piola = mu * (F - mu * F_inv_T) + la * logJ * F_inv_T;
+    return piola;
+    
+}
+
+float3 cross(float3 e10, float3 e20)
+{
+    float3 normal;
+    normal.x = e10.y * e20.z - e10.z * e20.y;
+    normal.y = e10.z * e20.x - e10.x * e20.z;
+    normal.z = e10.x * e20.y - e10.y * e20.x;
+    return normal;
+}
+
+void atomicAddFloat(RWByteAddressBuffer buf, int idx, float value)
+{
+    uint i_val = asuint(value);
+    uint tmp0 = 0;
+    uint tmp1;
+    // Raw Byte 4 点浮点数对齐
+    uint meidx = idx * 4;
+    while (true)
+    {
+        //如果node_force[idx] == tmp0，
+        //那么tmp1 = node_force[idx], node_force[idx] = i_val
+        //此时tmp0 == tmp1 == 原始值
+        //因为有可能在相加的过程中，别的核也在加，那么自己就被改了
+        //所以除非相等，才保证在自己改动的过程别人没改过
+        //如果不相等，就要更新别人改过后的值，也就是tmp1
+        buf.InterlockedCompareExchange(meidx, tmp0, i_val, tmp1);
+        if (tmp0 == tmp1)
+            break;
+        tmp0 = tmp1;
+        i_val = asuint(value + asfloat(tmp1));
+    }
+}
+
+[numthreads(2, 1, 1)]
+void CSMain(uint3 id : SV_DispatchThreadID)
+{
+    int idx = id.x * 3;
+    int idx0 = element[idx + 0];
+    int idx1 = element[idx + 1];
+    int idx2 = element[idx + 2];
+    // 虽然存了三维数据，但只对二维有效果
+    float2 p0 = float2(node_pos[idx0 * 3 + 0], node_pos[idx0 * 3 + 1]);
+    float2 p1 = float2(node_pos[idx1 * 3 + 0], node_pos[idx1 * 3 + 1]);
+    float2 p2 = float2(node_pos[idx2 * 3 + 0], node_pos[idx2 * 3 + 1]);
+    idx = id.x * 4;
+    float2x2 p_X_inv = float2x2(element_minv[idx + 0], element_minv[idx + 1], element_minv[idx + 2], element_minv[idx + 3]);
+    float2x2 p_x = float2x2(p1.x - p0.x, p2.x - p0.x, p1.y - p0.y, p2.y - p0.y);
+    float2x2 F = mul(p_x, p_X_inv);
+    float3 normal = cross(float3(p1 - p0, 0), float3(p2 - p0, 0));
+    
+    atomicAddFloat(node_normal, idx0 * 3 + 0, normal.x);
+    atomicAddFloat(node_normal, idx0 * 3 + 1, normal.y);
+    atomicAddFloat(node_normal, idx0 * 3 + 2, normal.z);
+    
+    atomicAddFloat(node_normal, idx1 * 3 + 0, normal.x);
+    atomicAddFloat(node_normal, idx1 * 3 + 1, normal.y);
+    atomicAddFloat(node_normal, idx1 * 3 + 2, normal.z);
+    
+    atomicAddFloat(node_normal, idx2 * 3 + 0, normal.x);
+    atomicAddFloat(node_normal, idx2 * 3 + 1, normal.y);
+    atomicAddFloat(node_normal, idx2 * 3 + 2, normal.z);
+
+     //   element_minv[idx + 0] = normal.x;
+     //   element_minv[idx + 1] = normal.y;
+     //  element_minv[idx + 2] = normal.z;
+     //  element_minv[idx + 3] = 0;
+    
+    /*
+    线弹性 p16 section 3.2
+    特点1：恢复力与形变程度成比例，或者说是线性的，简单友好
+    特点2：适于处理小形变，当形变程度太大，由于恢复力与之是线性关系，所以恢复初始形状起来很缓慢
+    特点3：物体旋转也会被当作是形变，这是错误的，因为旋转并未造成面积改变
+    */
+    //float2x2 psi_linearElasticity = mu * innerProduct(strainTensor, strainTensor) + mu * 0.5 * trace(strainTensor) * trace(strainTensor);
+    float energy_linearElasticity;
+    float2x2 pio_linearElasticity = linearElastic(F, energy_linearElasticity);
+    /*
+    St. Venant-Kirchhoff model
+    p18 section 3.3
+    特点1：不受刚体运动，即旋转和位移的影响，因为这两种都不算形变，面积没有改变
+    特点2：当面积被改变的范围在0~58%的范围内，恢复力会随着形变程度的提高而增强
+              然而超过这个范围后，恢复力将减弱
+    特点2：如果面积/体积被改变得小于零，那么改变会继续下去
+    */
+    float energy_stvk = 0;
+    float2x2 pio_stvk = stvk(F, energy_stvk);
+    
+    
+    float energy_asRigid;
+    float2x2 pio_asRigid = coratation(F, energy_asRigid);
+    /*
+    Corotated linear elasticity
+    p19 section 3.4
+    特点1：不受旋转影响，同时又保留线性特性
+    特点2：需要SVD分解，你不知道这玩意特别难算！
+    */
+    float energy_corotate;
+    float2x2 pio_corotate = coratation(F, energy_corotate);
+    /*
+    Neo-Hookean 模型
+    piola = mu * (F - F_inv_T) + la * log(jac) * F_inv_T;
+    特点1：抗极限压缩能力。当物体被压缩得非常厉害时，形变梯度的det肯定远远小于一并且大于零，
+             那么log的性质你们也知道，log(jac)将是是一个绝对值很大的负数，那么piola最后也是很大的负数
+    特点2：当第二个lame常数很大时，那么物体将趋近不可压
+    特点3：如果jac<0，那么log(jac)未定义。在数值迭代不收敛的时候很容易造成这种现象。所以要让jac>=0.01
+    特点4：Stvk和corateted是各项同性的(p21)，钢筋混凝土是各项异性的，从有钢筋支撑的方向和无钢筋支撑的
+                方向对形变的抵抗程度不同。人的肌肉也是各项异性的
+    */
+    float energy_neo = 0;
+    float2x2 piola_neo = neoHookean(F, energy_neo);
+    float area = normal.z * 0.5;
+    
+    // H 在这里没有加负号，因为我算位置的梯度，和参考[1]的算的梯度是反过来的
+    float energy = energy_neo;
+    float2x2 H = area * mul(piola_neo, transpose(inverse(p_X_inv)));
+    
+    float gradc00 = H._11;
+    float gradc01 = H._21;
+    float gradc10 = H._12;
+    float gradc11 = H._22;
+    float gradc20 = -H._11 - H._12;
+    float gradc21 = -H._21 - H._22;
+    
+    float sumGradC = invMass * (gradc00 * gradc00 +
+    gradc01 * gradc01 + gradc10 * gradc10 + gradc11 * gradc11
+    + gradc20 * gradc20 + gradc21 * gradc21);
+    
+    if (sumGradC < 1e-10)
+       return;
+    
+    sumGradC = 1.0 / sumGradC;
+
+    // 
+
+    sumGradC = 1.0;
+    energy = 1.0;
+    
+    atomicAddFloat(node_force,idx0 * 3 + 0, gradc00 * invMass * energy * sumGradC);
+    atomicAddFloat(node_force, idx0 * 3 + 1, gradc01 * invMass * energy * sumGradC);
+    
+    atomicAddFloat(node_force, idx1 * 3 + 0, gradc10 * invMass * energy * sumGradC);
+    atomicAddFloat(node_force, idx1 * 3 + 1, gradc11 * invMass * energy * sumGradC);
+    
+    atomicAddFloat(node_force, idx2 * 3 + 0, gradc20 * invMass * energy * sumGradC);
+    atomicAddFloat(node_force, idx2 * 3 + 1, gradc21 * invMass * energy * sumGradC);
+    
+
+}

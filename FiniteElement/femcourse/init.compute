@@ -1,0 +1,41 @@
+﻿// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel CSMain
+
+StructuredBuffer<float> node_pos;
+StructuredBuffer<int> element;
+RWStructuredBuffer<float> element_minv;
+
+
+float2x2 inverse(float2x2 mat)
+{
+    float det_inv = 1.0 / (mat._11 * mat._22 - mat._12 * mat._21);
+    return float2x2(mat._22 * det_inv, -mat._12 * det_inv, -mat._21 * det_inv, mat._11 * det_inv);
+}
+
+
+
+[numthreads(2,1,1)]
+void CSMain (uint3 id : SV_DispatchThreadID)
+{
+    int idx = id.x * 3;
+    int idx0 = element[idx + 0];
+    int idx1 = element[idx + 1];
+    int idx2 = element[idx + 2];
+    // 虽然存了三维数据，但只对二维有效果
+    float2 p0 = float2(node_pos[idx0 * 3 + 0], node_pos[idx0 * 3 + 1]);
+    float2 p1 = float2(node_pos[idx1 * 3 + 0], node_pos[idx1 * 3 + 1]);
+    float2 p2 = float2(node_pos[idx2 * 3 + 0], node_pos[idx2 * 3 + 1]);
+
+    float2x2 minv =  inverse(float2x2(p1.x - p0.x, p2.x - p0.x, p1.y - p0.y, p2.y - p0.y));
+    idx  = id.x * 4;
+    element_minv[idx + 0] = minv._11;
+    element_minv[idx + 1] = minv._12;
+    element_minv[idx + 2] = minv._21;
+    element_minv[idx + 3] = minv._22;
+    /*
+    element_minv[idx + 0] = p1.x - p0.x;
+    element_minv[idx + 1] = p1.y - p0.y;
+    element_minv[idx + 2] = p2.x - p0.x;
+    element_minv[idx + 3] = p2.y - p0.y;
+    */
+}

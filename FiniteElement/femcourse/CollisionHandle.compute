@@ -1,0 +1,44 @@
+﻿// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel CSMain
+
+RWStructuredBuffer<float> node_vel;
+RWStructuredBuffer<float> node_pos;
+
+float dt;
+[numthreads(2,1,1)]
+void CSMain (uint3 id : SV_DispatchThreadID)
+{
+    float px = node_pos[id.x * 3 + 0];
+    float py = node_pos[id.x * 3 + 1];
+    float pz = node_pos[id.x * 3 + 2];
+    float cx = 0.1, cy = 0.0, cr = 0.3;
+    float3 disp = float3(px - cx, py - cy, 0);
+    float disp2 = (px - cx) * (px - cx) + (py - cy) * (py - cy);
+    if (disp2 < cr * cr)
+    {
+        float3 vel = float3(node_vel[id.x * 3 + 0], node_vel[id.x * 3 + 1], node_vel[id.x * 3 + 2]);
+        float NoV = dot(vel, disp) * 10;
+        if(NoV < 0)
+        {
+           node_vel[id.x * 3 + 0] -= NoV * disp.x / disp2;
+            node_vel[id.x * 3 + 1] -= NoV * disp.y / disp2;
+            node_vel[id.x * 3 + 2] -= NoV * disp.z / disp2;
+        }
+    }
+    node_vel[id.x * 3 + 0] *= 0.8;
+    node_vel[id.x * 3 + 1] *= 0.8;
+    node_vel[id.x * 3 + 2] *= 0.8;
+    
+    node_pos[id.x * 3 + 0] += dt * node_vel[id.x * 3 + 0];
+    node_pos[id.x * 3 + 1] += dt * node_vel[id.x * 3 + 1];
+    node_pos[id.x * 3 + 2] += dt * node_vel[id.x * 3 + 2];
+    
+    if (node_pos[id.x * 3 + 1] < 0)
+    {
+        node_vel[id.x * 3 + 1] = 0;
+        node_pos[id.x * 3 + 1] = 0;
+
+    }
+
+
+}

@@ -1,0 +1,29 @@
+﻿// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel CSMain
+
+RWStructuredBuffer<float> node_pos;
+RWStructuredBuffer<float> node_vel;
+RWStructuredBuffer<float> node_n;
+RWByteAddressBuffer node_force;
+RWByteAddressBuffer node_normal;
+float dt;
+float gravity;
+float mass;
+
+[numthreads(2,1,1)]
+void CSMain (uint3 id : SV_DispatchThreadID)
+{
+    int idx = (int)(id.x / 3) * 3;
+    float nme = asfloat(node_normal.Load4(id.x * 4));
+    float force =  asfloat(node_force.Load4(id.x * 4));
+    node_vel[id.x] += force / mass * dt;
+    //阻尼非常重要
+    if (id.x % 3 == 1)
+        node_vel[id.x] -= gravity;
+    node_vel[id.x] += dt * force / mass;
+    //node_pos[id.x] += dt * node_vel[id.x];
+    node_n[id.x] = nme;
+    
+    node_force.Store4(id.x * 4, 0);
+    node_normal.Store4(id.x * 4, 0);
+}
