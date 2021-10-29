@@ -1,0 +1,8 @@
+光追煤气灶
+
+LevelSet
+
+https://github.com/benjones/strainLimitingForClusteredShapeMatching
+
+http://geometry.cs.cmu.edu/ddgshortcourse/index.html
+
