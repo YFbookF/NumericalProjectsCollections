@@ -1,8 +1,18 @@
 光追煤气灶
 
+铁门僵尸的铁门选购指南
+
 LevelSet
 
 https://github.com/benjones/strainLimitingForClusteredShapeMatching
 
 http://geometry.cs.cmu.edu/ddgshortcourse/index.html
+
+https://github.com/yuki-koyama/real-time-example-based-elastic-deformation
+
+asrigidaspossiple 有很多代码
+
+large steps
+
+elastic rods
 

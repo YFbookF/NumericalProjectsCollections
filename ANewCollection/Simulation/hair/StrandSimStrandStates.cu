@@ -47,7 +47,13 @@ __device__ Vec<T, 3> orthonormalParallelTransport(const Vec<T, 3>& u, const Vec<
 
 	Vec<T, 3> n0 = t0.cross(b);
 	Vec<T, 3> n1 = t1.cross(b);
-
+    //u [-0.7,0.7,0] u is normal
+	//t0 [0.7,0.7,0]
+	//t1 [1,0,0]
+	//b [0,0,1]
+	//n0 [0.7,-0.7,0]
+	//n1 [0,-1,0]
+	// return [0,1,0] + 0
 	return u.dot(n0) * n1 + u.dot(b) * b;
 }
 

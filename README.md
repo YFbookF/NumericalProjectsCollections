@@ -1331,6 +1331,8 @@ Silly Rubber: An Implicit Material Point Method For Simulating Non-Equilibrated 
 
 ### Light&Shadow
 
+https://github.com/tflsguoyu/layeredbsdf
+
 论文名称：**Differentiable Monte Carlo Ray Tracing through Edge Sampling**
 
 项目地址：https://people.csail.mit.edu/tzumao/diffrt/
@@ -1578,3 +1580,5 @@ http://people.csail.mit.edu/aschulz/optCAD/index.html 200MB的代码...CAD
 http://solidmechanics.org/FEA.htm 强大的有限元分析matlab
 
 https://www.cs.columbia.edu/cg/codes.php
+
+https://github.com/alecjacobson/geometry-processing-deformation
