@@ -1,10 +1,14 @@
 https://github.com/david-hahn/FractureRB
         // Brent-Dekker iteration
+		// solve approximation problem f(x) = 0
+		//step 1. if |b - c| < delta , the method returns b as the approximation solution
         while( found && std::abs(fa) > eps && std::abs(b-a)>eps ) {
             fc= evalKthMinusKcGradient(
                 Kth, dKth_dth, Kc_p, dKc_dn, dKc,
                 c, K, pos, n1, n2
             );
+		// step 2. if a = c then b is determined by 
+		//linear (secant) interpolations b = (af(b) - bf(a))/(f(b) - f(a))
             if( std::abs(fa-fc)>eps && std::abs(fb-fc)>eps ){ // can use inv quad interp
                 s = a*fb*fc/((fa-fb)*(fa-fc)) + b*fa*fc/((fb-fa)*(fb-fc)) + c*fa*fb/((fc-fa)*(fc-fb));
             }else{ // use lin interp
@@ -30,3 +34,8 @@ https://github.com/david-hahn/FractureRB
                 tmp =fa; fa=fb; fb= tmp;
             }
         }
+		if(found){
+            // theta must always be in [-pi/2,+pi/2]
+            th = asin(sin(a));
+        }
+        return th;

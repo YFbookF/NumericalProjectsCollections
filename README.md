@@ -1582,3 +1582,17 @@ http://solidmechanics.org/FEA.htm 强大的有限元分析matlab
 https://www.cs.columbia.edu/cg/codes.php
 
 https://github.com/alecjacobson/geometry-processing-deformation
+
+### New
+
+http://www.oliviermercier.com/
+
+https://web.cse.ohio-state.edu/~wang.3602/publications.html
+
+http://visualcomputing.ist.ac.at/publications/2020/HYLC/
+
+https://elrnv.com/projects/frictional-contact-on-smooth-elastic-solids/
+
+https://shuangz.com/publications.htm#ctcloth-sg16
+
+https://git.ist.ac.at/gsperl/HYLC/-/tree/master/solver/src/simulation/statics/constraints
