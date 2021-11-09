@@ -787,6 +787,18 @@ http://graphics.stanford.edu/~djames/publications/
 
 代码地址：https://polyfem.github.io/
 
+论文名称：Projective Dynamics: Fast Simulation of Hyperelastic Models with Dynamic Constraints
+
+项目地址：https://mattoverby.net/pages/admmpd_abstract.html
+
+代码地址：http://www.github.com/mattoverby/admm-elastic
+
+项目地址：Projective Dynamics: Fast Simulation of General Constitutive Models"
+
+项目地址：http://rahul.narain.name/admm-pd/
+
+代码地址：http://www.github.com/mattoverby/admm-elastic-sca
+
 ### FluidSolidInteraction
 
 论文名称：A Multi-Scale Model for Simulating Liquid-Fabric Interactions
@@ -1054,6 +1066,12 @@ https://github.com/songrun/SeamAwareDecimater
 项目地址：他人实现
 
 代码地址：https://github.com/likangning93/HRBF-Skin
+
+论文名称：Bounded Biharmonic Weights on voxel grid
+
+项目地址：https://www.cs.utah.edu/~ladislav/
+
+代码地址：https://www.cs.utah.edu/~ladislav/voxelbbw/voxelbbw-src.zip
 
 ### Water&Flow&Fluid
 
