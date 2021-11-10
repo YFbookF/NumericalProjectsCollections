@@ -1,4 +1,5 @@
 ===========基于CUDA的并行程序设计
+感觉也没什么特殊之处啊
 template<typename T> __global__ void MeanFilterCUDA(T* pInput, T* pOutput,
 	int nKernelSize, int nWidth, int nHeight)
 

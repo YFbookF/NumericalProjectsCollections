@@ -259,16 +259,6 @@ void CreateBVH()
 	Vector3f root_bb_min(WORLD_MAX, WORLD_MAX, WORLD_MAX);
 	Vector3f root_bb_max(-WORLD_MAX, -WORLD_MAX, -WORLD_MAX);
 
-	for (unsigned int j = 0; j < 8; j++)
-	{
-		//printf_s("%f %f %f\n", scene_vertices_pos[j].x, scene_vertices_pos[j].y, scene_vertices_pos[j].z);
-	}
-
-	for (unsigned int j = 0; j < 12; j++)
-	{
-		//printf_s("%d %d %d\n", scene_triangles[j]._idx1, scene_triangles[j]._idx2, scene_triangles[j]._idx3);
-	}
-
 	for (unsigned int j = 0; j < triangle_num; j++)
 	{
 		BBoxTemp bbt;

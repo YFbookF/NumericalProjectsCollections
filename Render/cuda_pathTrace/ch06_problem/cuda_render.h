@@ -4,8 +4,8 @@ class Vertex;
 class Triangle;
 
 #define M_PI 3.14159265359f
-#define width 512	// screenwidth
-#define height 512	// screenheight
+#define screen_width 1024	// screenwidth
+#define screen_height 512	// screenheight
 #define samps  1	// samples per pixel per pass
 
 extern float3* accumulatebuffer;
@@ -22,10 +22,7 @@ extern int total_number_of_scene_triangles;
 extern float3 scene_aabbox_min;
 extern float3 scene_aabbox_max;
 
-void disp();
-
-void initCUDAmemoryTriMesh();
 void pre_render_kernel(float3* output, float3* accumbuffer, const int numscene_triangles, int framenumber, int hashedframenumber, float3 scene_bbmin, float3 scene_bbmax, 
-	std::vector<float4> cuda_scene_triangles, float* cudaSlabLimit, int* cudaTreeInfo, int bvh_node_num);
+	std::vector<float4> cuda_scene_triangles, float* cudaSlabLimit, int* cudaTreeInfo, int bvh_node_num,float4* cudaHDR);
 
 #endif // ! __CUDA_RENDER_H_

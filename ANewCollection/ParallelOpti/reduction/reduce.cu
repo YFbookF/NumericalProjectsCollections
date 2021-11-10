@@ -158,6 +158,9 @@ __global__ void reduce2(unsigned int* g_odata, unsigned int* g_idata, unsigned i
 	//  the threads now access shared memory with a stride of one
 	//  32-bit word (unsigned int) now, which does not cause bank 
 	//  conflicts
+	// 基于CUDA的并行程序设计，但是当处于half-warp内多个线程同时访问一个数据块
+	// 会产生共享存储器访问冲突，此时GPU只能串行对数据进行访问，代码2中用2xsxtid作为索引值
+	// 线程寻址步长为2xs。
 	for (unsigned int s = blockDim.x / 2; s > 0; s >>= 1) {
 		if (tid < s) {
 			sdata[tid] += sdata[tid + s];
@@ -190,7 +193,16 @@ __global__ void reduce3(unsigned int* g_odata, unsigned int* g_idata, unsigned i
 	{
 		sdata[tid] = g_idata[i] + g_idata[i + blockDim.x];
 	}
-
+	// 这里可以改成
+	/*
+	unsigned int gridSize = blockSize * 2 * gridDim.x;
+	while(i < n)
+	{
+		sdata[tid] = g_idata[i] + g_idata[i + blockDim.x];
+		i += gridSize;
+	}
+	*/
+	
 	__syncthreads();
 
 	// do reduction in shared mem

@@ -9,9 +9,7 @@
 #include <cuda.h>
 #include <GL/glew.h>
 #include <GL/freeglut.h>
-#define __CUDA_INTERNAL_COMPILATION__
 #include "math_functions.h"
-#undef __CUDA_INTERNAL_COMPILATION__
 #include <vector_types.h>
 #include <vector_functions.h>
 #include "device_launch_parameters.h"
@@ -30,7 +28,7 @@
  float* dev_triangle_p; // the cuda device pointer that points to the uploaded scene_triangles
 // output buffer
  float3* dptr;
-#define BVH_STACK_SIZE 8
+#define BVH_STACK_SIZE 32
 int total_number_of_scene_triangles = 0;
 
 #define HDRwidth 3200
@@ -50,7 +48,7 @@ texture<float2, 1, cudaReadModeElementType> Texture_bvh_slab; // 用于检测bvh
 texture<float4, 1, cudaReadModeElementType> Texture_HDR;
 
 // hardcoded camera position
-__device__ float3 firstcamorig = { 50, 52, 295.6 };
+__device__ float3 firstcamorig = { 40, 52, 300 };
 
 // OpenGL vertex buffer object for real-time viewport
 
@@ -145,7 +143,7 @@ struct Ray {
 	__device__ Ray(float3 o_, float3 d_) : orig(o_), dir(d_) {}
 };
 
-enum Refl_t { DIFF, SPEC, REFR };  // material types, used in radiance(), only DIFF used here
+enum Refl_t { DIFF, SPEC, REFR ,METAL};  // material types, used in radiance(), only DIFF used here
 
 // SPHERES
 
@@ -371,10 +369,6 @@ __device__ void intersectAllscene_triangles(const Ray& r, float& t_scene, int& t
 		}
 	}
 }
-__device__ void intersectBVH(const float4 rayOri, const float4 rayDir)
-{
-	int thread_index = (blockIdx.x + blockIdx.y * gridDim.x) * (blockDim.x * blockDim.y) + (threadIdx.y * blockDim.x) + threadIdx.x;
-}
 
 // AXIS ALIGNED BOXES
 
@@ -452,9 +446,9 @@ __constant__ Sphere spheres[] = {
 	//{ 1600, { 3000.0f, 10, 6000 }, { 37, 34, 30 }, { 0.f, 0.f, 0.f }, DIFF },  // 37, 34, 30 // sun
 	//{ 1560, { 3500.0f, 0, 7000 }, { 50, 25, 2.5 }, { 0.f, 0.f, 0.f }, DIFF },  //  150, 75, 7.5 // sun 2
 	
-	{ 10000, { 50.0f, 40.8f, -1060 }, { 0.0003, 0.01, 0.15 }, { 0.175f, 0.175f, 0.25f }, DIFF }, // sky
-	{ 100000, { 50.0f, -100000, 0 }, { 0.0, 0.0, 0 }, { 0.8f, 0.2f, 0.f }, DIFF }, // ground
-	{ 82.5, { 30.0f, 180.5, 42 }, { 16, 12, 6 }, { .6f, .6f, 0.6f }, DIFF },  // small sphere 1
+	//{ 10000, { 50.0f, 40.8f, -1060 }, { 0.0003, 0.01, 0.15 }, { 0.175f, 0.175f, 0.25f }, DIFF }, // sky
+	//{ 100000, { 50.0f, -100000, 0 }, { 0.0, 0.0, 0 }, { 0.8f, 0.2f, 0.f }, DIFF }, // ground
+	{ 82.5, { 4, 4, 4 }, { 0, 0, 100 }, { .6f, .6f, 0.6f }, DIFF },  // small sphere 1
 	/*
 	{ 110000, { 50.0f, -110048.5, 0 }, { 3.6, 2.0, 0.2 }, { 0.f, 0.f, 0.f }, DIFF },  // horizon brightener
 	
@@ -472,7 +466,7 @@ __constant__ Box boxes[] = {
 	
 	/*{ { 5.0f, 0.0f, 70.0f }, { 45.0f, 11.0f, 115.0f }, { .0f, .0f, 0.0f }, { 0.5f, 0.5f, 0.5f }, DIFF },
 	{ { 85.0f, 0.0f, 95.0f }, { 95.0f, 20.0f, 105.0f }, { .0f, .0f, 0.0f }, { 0.5f, 0.5f, 0.5f }, DIFF },*/
-	{ { 75.0f, 20.0f, 85.0f }, { 105.0f, 22.0f, 115.0f }, { .0f, .0f, 0.0f }, { 0.5f, 0.5f, 0.5f }, DIFF },
+	{ { 25.0f, 10.0f, 35.0f }, { 155.0f, 12.0f, 165.0f }, { .0f, .0f, 0.0f }, { 0.5f, 0.5f, 0.5f }, DIFF },
 	
 };
 
@@ -506,33 +500,12 @@ __device__ inline bool intersect_scene(const Ray& r, float& t, int& sphere_id, i
 
 	// if ray hits bounding box of triangle meshes, intersect ray with all scene_triangles
     //scene_bbox.intersect(r)
-	intersect_bvh(r, t, triangle_id, geomtype);
-	//intersectAllscene_triangles(r, t, triangle_id, number_of_scene_triangles, geomtype);
+	//intersect_bvh(r, t, triangle_id, geomtype);
+	intersectAllscene_triangles(r, t, triangle_id, number_of_scene_triangles, geomtype);
 
 	// t is distance to closest intersection of ray with all primitives in the scene (spheres, boxes and scene_triangles)
 	return t < inf;
 }
-
-
-
-
-__device__ void intersecctBVHTriangle()
-{
-	int thread_index = (blockIdx.x + blockIdx.y * gridDim.x) * (blockDim.x * blockDim.y) + (threadIdx.y * blockDim.x) + threadIdx.x;
-	
-	int nodeAddress = 0; // 从 0 号点开始
-	
-	while (true)
-	{
-		while (true)
-		{
-			float4 child_pos_x = tex1Dfetch(bvhNodesPosTexture, nodeAddress);
-			float4 child_pos_y = tex1Dfetch(bvhNodesPosTexture, nodeAddress);
-			float4 child_pos_z = tex1Dfetch(bvhNodesPosTexture, nodeAddress);
-		}
-	}
-}
-
 // radiance function
 // compute path bounces in scene and accumulate returned color from each path sgment
 __device__ float3 radiance(Ray& r, curandState* randstate, const int totaltris, const float3& scene_aabb_min, const float3& scene_aabb_max) { // returns ray color
@@ -542,7 +515,7 @@ __device__ float3 radiance(Ray& r, curandState* randstate, const int totaltris, 
 	// accumulated colour
 	float3 accucolor = make_float3(0.0f, 0.0f, 0.0f);
 
-	for (int bounces = 0; bounces < 5; bounces++) {  // iteration up to 4 bounces (instead of recursion in CPU code)
+	for (int bounces = 0; bounces < 3; bounces++) {  // iteration up to 4 bounces (instead of recursion in CPU code)
 
 		// reset scene intersection function parameters
 		float t = 100000; // distance to intersection 
@@ -580,10 +553,10 @@ __device__ float3 radiance(Ray& r, curandState* randstate, const int totaltris, 
 			int v2 = (int)(v * HDRheight);
 
 			int HDRtexelidx = u2 + v2 * HDRwidth;
-			//float4  HDRcol = tex1Dfetch(Texture_HDR, HDRtexelidx);
-			//float3 HDRcol2 = make_float3(HDRcol.x, HDRcol.y, HDRcol.z) * 2.0f;
-			//accucolor += (mask * HDRcol2);
-			return make_float3(0.0f,0.0f,0.0f);
+			float4 HDRcol = tex1Dfetch(Texture_HDR, HDRtexelidx);
+			float3 HDRcol2 = make_float3(HDRcol.x, HDRcol.y, HDRcol.z) * 2.0f;
+			accucolor +=  HDRcol2;
+			return accucolor;
 		}
 
 		// else: we've got a hit with a scene primitive
@@ -596,7 +569,7 @@ __device__ float3 radiance(Ray& r, curandState* randstate, const int totaltris, 
 			n = normalize(x - sphere.pos);		// normal
 			nl = dot(n, r.dir) < 0 ? n : n * -1; // correctly oriented normal
 			f = sphere.col;   // object colour
-			refltype = sphere.refl;
+			refltype = METAL;
 			emit = sphere.emi;  // object emission
 			accucolor += (mask * emit);
 		}
@@ -608,7 +581,7 @@ __device__ float3 radiance(Ray& r, curandState* randstate, const int totaltris, 
 			n = normalize(box.normalAt(x)); // normal
 			nl = dot(n, r.dir) < 0 ? n : n * -1;  // correctly oriented normal
 			f = box.col;  // box colour
-			refltype = box.refl;
+			refltype = SPEC;
 			emit = box.emi; // box emission
 			accucolor += (mask * emit);
 		}
@@ -650,6 +623,25 @@ __device__ float3 radiance(Ray& r, curandState* randstate, const int totaltris, 
 			x += nl * 0.03;
 
 			// multiply mask with colour of object
+			mask *= f;
+		}
+		if (refltype == METAL)
+		{
+			float phi = 2 * M_PI * curand_uniform(randstate);
+			float r2 = curand_uniform(randstate);
+			float phong_exponent = 30;
+			float cosTheta = powf(1 - r2, 1.0f / (phong_exponent + 1));
+			float sinTheta = sqrtf(1 - cosTheta * cosTheta);
+
+			float3 w = normalize(r.dir - n * 2.0f * dot(n, r.dir));
+			float3 u = normalize(cross((fabs(w.x) > .1 ? make_float3(0, 1, 0) : make_float3(1, 0, 0)), w));
+			float3 v = cross(w, u);
+
+			d = u * cosf(phi) * sinTheta + v * sinf(phi) * sinTheta + w * cosTheta;
+			d = normalize(d);
+
+			x += nl * 0.03;
+
 			mask *= f;
 		}
 
@@ -741,18 +733,17 @@ __global__ void render_kernel(float3* output, float3* accumbuffer, const int num
 	curand_init(hashedframenumber + threadId, 0, 0, &randState);
 
 	Ray cam(firstcamorig, normalize(make_float3(0, -0.042612, -1)));
-	float3 cx = make_float3(width * .5135 / height, 0.0f, 0.0f);  // ray direction offset along X-axis 
+	float3 cx = make_float3(screen_width * .5135 / screen_height, 0.0f, 0.0f);  // ray direction offset along X-axis 
 	float3 cy = normalize(cross(cx, cam.dir)) * .5135; // ray dir offset along Y-axis, .5135 is FOV angle
-	float3 pixelcol; // final pixel color       
-
-	int i = (height - y - 1) * width + x; // pixel index
+	float3 pixelcol; // final pixel colorbvh
+	int i = (screen_height - y - 1) * screen_width + x; // pixel index
 
 	pixelcol = make_float3(0.0f, 0.0f, 0.0f); // reset to zero for every pixel	
 
 	for (int s = 0; s < samps; s++) {
 
 		// compute primary ray direction
-		float3 d = cx * ((.25 + x) / width - .5) + cy * ((.25 + y) / height - .5) + cam.dir;
+		float3 d = cx * ((.25 + x) / screen_width - .5) + cy * ((.25 + y) / screen_height - .5) + cam.dir;
 		// normalize primary ray direction
 		d = normalize(d);
 		// add accumulated colour from path bounces
@@ -802,7 +793,7 @@ extern "C"
 bool firstTime = true;
 
 void pre_render_kernel(float3* output, float3* accumbuffer, const int numscene_triangles, int framenumber, int hashedframenumber, float3 scene_bbmin, float3 scene_bbmax,
-	std::vector<float4> cuda_scene_triangles,float* cudaSlabLimit,int* cudaTreeInfo, int bvh_node_num)
+	std::vector<float4> cuda_scene_triangles,float* cudaSlabLimit,int* cudaTreeInfo, int bvh_node_num,float4* cudaHDR)
 {
 
 	if (firstTime)
@@ -831,11 +822,11 @@ void pre_render_kernel(float3* output, float3* accumbuffer, const int numscene_t
 
 		Texture_HDR.filterMode = cudaFilterModeLinear;
 		cudaChannelFormatDesc channel3desc = cudaCreateChannelDesc<float4>();
-		//cudaBindTexture(NULL, &Texture_tree_info, HDRmap, &channel3desc, HDRheight * HDRwidth * sizeof(uint4));
+		cudaBindTexture(NULL, &Texture_HDR, cudaHDR, &channel3desc, HDRheight * HDRwidth * sizeof(float4));
 
 	}
-	dim3 block(16, 16, 1);
-	dim3 grid(width / block.x, height / block.y, 1);
+	dim3 block(8, 16, 1);
+	dim3 grid(screen_width / block.x, screen_height / block.y, 1);
 
 	// launch CUDA path tracing kernel, pass in a hashed seed based on number of frames
 	render_kernel << < grid, block >> > (dptr, accumulatebuffer, total_number_of_scene_triangles, framenumber, hashedframenumber, scene_aabbox_max, scene_aabbox_min);  // launches CUDA render kernel from the host

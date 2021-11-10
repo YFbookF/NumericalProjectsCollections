@@ -11,6 +11,7 @@
 #include "loadModel.h"
 #include "linear_algebra.h"
 #include "bvh.h"
+#include "HDRloader.h"
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -24,6 +25,10 @@ Vertex* cudaVertices2 = NULL;
 Triangle* cudaTriangles2 = NULL;
 float* cudaSlabLimit2 = NULL;// 有6 * node_num个大小，因为每个node_num都有一个aabb
 int* cudaTreeInfo2 = NULL;
+float4* cudaHDR;
+
+
+const char* HDRmapname = "resource/topanga.hdr";
 
 void Timer(int obsolete) {
 
@@ -51,20 +56,20 @@ int BVHNode_num;
 // 4. copy to CUDA texture memory with bindscene_triangles()
 void initCUDAmemoryTriMesh()
 {
-
-	loadObj("cube.obj");
+	int obj_triangle_num = 0;
+	loadObj("tree.obj", obj_triangle_num);
 
 	CreateBVH();
 	//loadObj("cube.obj", mesh1);
 	// scalefactor and offset to position/scale triangle meshes
-	float scalefactor1 = 10;
-	float scalefactor2 = 10;  // 300
+	float scalefactor1 = 2;
+	float scalefactor2 = 2;  // 300
 	Vector3f offset1 = Vector3f(90, 22, 100);// (30, -2, 80);
 	float3 offset2 = make_float3(30, 12, 80);
 
 	
 
-	for (unsigned int i = 0; i < 12; i++)
+	for (unsigned int i = 0; i < obj_triangle_num; i++)
 	{
 		int idx1 = scene_triangles[i]._idx1;
 		int idx2 = scene_triangles[i]._idx2;
@@ -115,7 +120,7 @@ void initCUDAmemoryTriMesh()
 		tree_info[4 * i + 1] = BVHCahce[i]._left;
 		tree_info[4 * i + 2] = BVHCahce[i]._right;
 		tree_info[4 * i + 3] = BVHCahce[i].tri_idx;
-		printf_s("oo %d %d %d %d\n", tree_info[4 * i + 0], tree_info[4 * i + 1], tree_info[4 * i + 2], tree_info[4 * i + 3]);
+		//printf_s("oo %d %d %d %d\n", tree_info[4 * i + 0], tree_info[4 * i + 1], tree_info[4 * i + 2], tree_info[4 * i + 3]);
 	}
 	
 	cudaMalloc((void**)&cudaTreeInfo2, BVHNode_num * 4 * sizeof(float));
@@ -142,7 +147,8 @@ void disp(void)
 	// dim3 grid(WINDOW / block.x, WINDOW / block.y, 1);
 	// dim3 CUDA specific syntax, block and grid are required to schedule CUDA threads over streaming multiprocessors
 
-	pre_render_kernel(dptr, accumulatebuffer, total_number_of_scene_triangles, frames, WangHash(frames), scene_aabbox_max, scene_aabbox_min, cuda_scene_triangles,cudaSlabLimit2,cudaTreeInfo2, BVHNode_num);
+	pre_render_kernel(dptr, accumulatebuffer, total_number_of_scene_triangles, frames, WangHash(frames), 
+		scene_aabbox_max, scene_aabbox_min, cuda_scene_triangles,cudaSlabLimit2,cudaTreeInfo2, BVHNode_num,cudaHDR);
 	
 
 	cudaThreadSynchronize();
@@ -156,7 +162,7 @@ void disp(void)
 
 	glEnableClientState(GL_VERTEX_ARRAY);
 	glEnableClientState(GL_COLOR_ARRAY);
-	glDrawArrays(GL_POINTS, 0, width * height);
+	glDrawArrays(GL_POINTS, 0, screen_width * screen_height);
 	glDisableClientState(GL_VERTEX_ARRAY);
 
 	glutSwapBuffers();
@@ -170,7 +176,7 @@ void createVBO(GLuint* vbo)
 	glBindBuffer(GL_ARRAY_BUFFER, *vbo);
 
 	//initialize VBO
-	unsigned int size = width * height * sizeof(float3);  // 3 floats
+	unsigned int size = screen_width * screen_height * sizeof(float3);  // 3 floats
 	glBufferData(GL_ARRAY_BUFFER, size, 0, GL_DYNAMIC_DRAW);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
@@ -180,10 +186,53 @@ void createVBO(GLuint* vbo)
 
 
 
+bool loadHDR(const char* fileName)
+{
+	HDRImage HDRresult;
+	const char* HDRfile = HDRmapname;
+
+	if (HDRLoader::load(HDRfile, HDRresult))
+		printf("HDR environment map loaded. Width: %d Height: %d\n", HDRresult.width, HDRresult.height);
+	else {
+		printf("HDR environment map not found\nAn HDR map is required as light source. Exiting now...\n");
+		system("PAUSE");
+		exit(0);
+	}
+
+	int HDRwidth = HDRresult.width;
+	int HDRheight = HDRresult.height;
+	Vector4f*	cpuHDRenv = new Vector4f[HDRwidth * HDRheight];
+	//_data = new RGBColor[width*height];
+
+	for (int i = 0; i < HDRwidth; i++) {
+		for (int j = 0; j < HDRheight; j++) {
+			int idx = 3 * (HDRwidth * j + i);
+			//int idx2 = width*(height-j-1)+i;
+			int idx2 = HDRwidth * (j)+i;
+			cpuHDRenv[idx2] = Vector4f(HDRresult.colors[idx], HDRresult.colors[idx + 1], HDRresult.colors[idx + 2], 0.0f);
+		}
+	}
+
+	cudaMalloc(&cudaHDR, HDRheight * HDRwidth * sizeof(float4));
+	cudaMemcpy(cudaHDR, cpuHDRenv, HDRheight * HDRwidth * sizeof(float4),cudaMemcpyHostToDevice);
+	return true;
+}
+
+
 int main(int argc, char** argv) {
 
 	// allocate memmory for the accumulation buffer on the GPU
-	cudaMalloc(&accumulatebuffer, width * height * sizeof(float3));
+	cudaMalloc(&accumulatebuffer, screen_width * screen_height * sizeof(float3));
+
+	if (loadHDR(HDRmapname))
+	{
+		printf("load HDR success\n");
+	}
+	else
+
+	{
+		printf("error:unable to load HDR\n");
+	}
 	// load triangle meshes in CUDA memory
 	initCUDAmemoryTriMesh();
 	// init glut for OpenGL viewport
@@ -193,13 +242,13 @@ int main(int argc, char** argv) {
 	// specify the initial window position
 	glutInitWindowPosition(100, 100);
 	// specify the initial window size
-	glutInitWindowSize(width, height);
+	glutInitWindowSize(screen_width, screen_height);
 	// create the window and set title
 	glutCreateWindow("Basic triangle mesh path tracer in CUDA");
 	// init OpenGL
 	glClearColor(0.0, 0.0, 0.0, 0.0);
 	glMatrixMode(GL_PROJECTION);
-	gluOrtho2D(0.0, width, 0.0, height);
+	gluOrtho2D(0.0, screen_width, 0.0, screen_height);
 	fprintf(stderr, "OpenGL initialized \n");
 	// register callback function to display graphics:
 	glutDisplayFunc(disp);

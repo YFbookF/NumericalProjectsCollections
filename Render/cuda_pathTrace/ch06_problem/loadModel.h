@@ -16,7 +16,7 @@ struct TriangleMesh
 	float3 bounding_box[2];
 };
 
-void loadObj(const std::string filename);
+void loadObj(const std::string filename,int& obj_triangle_num);
 void loadObj(const std::string filename, TriangleMesh& mesh);
 
 #endif // !__LOADMODEL_H_
