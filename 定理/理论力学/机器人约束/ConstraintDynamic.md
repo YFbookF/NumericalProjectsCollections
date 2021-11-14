@@ -74,3 +74,10 @@ ks is spring constants, kd is damping constraint 或者下面这么写
 $$
 \bold J \bold M^{-1} \bold J^T \lambda = - \dot{\bold J}\dot{\bold q} - \bold J \bold M^{-1}\bold Q
 $$
+===================RedMax
+
+![image-20211114215934920](E:\mycode\collection\定理\理论力学\机器人约束\image-20211114215934920.png)
+
+![image-20211114215953318](E:\mycode\collection\定理\理论力学\机器人约束\image-20211114215953318.png)
+
+![image-20211114220114825](E:\mycode\collection\定理\理论力学\机器人约束\image-20211114220114825.png)

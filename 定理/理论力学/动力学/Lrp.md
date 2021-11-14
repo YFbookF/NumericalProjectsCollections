@@ -75,7 +75,7 @@ V(x) = -\int
 $$
 Computational Continuum Mechanics by Ahmed A. Shabana (z-lib.org)
 
-![image-20211025194431539](D:\定理\理论力学\动力学\image-20211025194431539.png)
+![image-20211025194431539](E:\mycode\collection\定理\理论力学\动力学\image-20211025194431539.png)
 
 A FINITE STRAIN BEAM FORMULATION. THE THREE-DIMENSIONAL  
 
@@ -101,7 +101,7 @@ $$
 $$
 那么
 
-![image-20211026142432965](D:\定理\理论力学\动力学\image-20211026142432965.png)
+![image-20211026142432965](E:\mycode\collection\定理\理论力学\动力学\image-20211026142432965.png)
 
 ===========An Introduction to Physically Based Modeling: Rigid Body Simulation I—Unconstrained Rigid Body Dynamics  
 
@@ -159,7 +159,7 @@ $$
 \dot r_i(t) = \omega^*R(t) r_{0i} + v(t) = \omega(t)^*(R(t) r_{0i} + x(t) -x(t)) + v(t) \\
 = \omega(t)^*(r_i(t) - x(t)) + v(t)
 $$
-![image-20211026211144686](D:\定理\理论力学\动力学\image-20211026211144686.png)
+![image-20211026211144686](E:\mycode\collection\定理\理论力学\动力学\image-20211026211144686.png)
 
 之后还有代码，好notes
 
@@ -171,10 +171,17 @@ $$
 $$
 ============physically-based models with rigid and deformable components
 
-![image-20211102160941069](D:\定理\理论力学\动力学\image-20211102160941069-16358406252211.png)
+![image-20211102160941069](E:\mycode\collection\定理\理论力学\动力学\image-20211102160941069-16358406252211.png)
 
-![image-20211102161041685](D:\定理\理论力学\动力学\image-20211102161041685.png)
+![image-20211102161041685](E:\mycode\collection\定理\理论力学\动力学\image-20211102161041685.png)
 
-![image-20211102161112935](D:\定理\理论力学\动力学\image-20211102161112935.png)
 
-![image-20211102161123705](D:\定理\理论力学\动力学\image-20211102161123705.png)
+
+![image-20211102161112935](E:\mycode\collection\定理\理论力学\动力学\image-20211102161112935.png)
+
+
+
+![image-20211102161123705](E:\mycode\collection\定理\理论力学\动力学\image-20211102161123705.png)
+
+
+
