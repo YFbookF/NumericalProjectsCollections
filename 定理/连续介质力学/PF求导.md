@@ -124,3 +124,7 @@ $$
 \nabla_{\bold p_0}C = -2\bold p_2 \times (\bold p_1 \times \bold p_2)- 2\bold p_1 \times (\bold p_2 \times \bold p_1)
 $$
 ===============Practical notes on implementing derivatives
+
+===============Editing Fluid Animation using Flow Interpolation  
+
+![image-20211116121518227](E:\mycode\collection\定理\连续介质力学\image-20211116121518227.png)

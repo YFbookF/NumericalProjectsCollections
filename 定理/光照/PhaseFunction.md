@@ -97,3 +97,70 @@ Float BeamDiffusionSS(Float sigma_s, Float sigma_a, Float g, Float eta, Float r)
 
 这个会被用于生成查找表，然后查找表在SubsurfaceFromDiffuse(用于传给invertCatmullRom中算rho，最终用于算Sr。Sr是什么？
 
+=============================Volumetric Skin and Fabric Shading at Framestore  
+
+![image-20211116095408083](E:\mycode\collection\定理\光照\image-20211116095408083.png)
+
+=========================
+
+von Mises–Fisher phase function  
+$$
+phase(\gamma) = \frac{\kappa}{4\pi \sinh \kappa}\exp(\kappa \cos \gamma)
+$$
+而且
+$$
+\cos \gamma = \mu \mu' + \sqrt{(1 - \mu^2)(1 - \mu'^2)}\cos(\phi - \phi')
+$$
+Due to its inherent simplicity, the HG model is a common default choice when simulating anisotropic volumetric scattering, but in a recent study, Gkioulekas et al. [2013] analyzed the perceptual significance of different phase function spaces and recommended switching to a larger space containing linear combinations of the HG model and lobes of the von Mises–Fisher distribution defined as  
+
+```
+Float mu_o = m_nodes[o];
+                    Float A = kappa * mu_i * mu_o;
+                    Float B = kappa * math::safe_sqrt((1 - mu_i * mu_i) *
+                                                      (1 - mu_o * mu_o));
+                    expCosFourierSeries(A, B, ERROR_GOAL, result);
+
+
+void expCosFourierSeries(Float A, Float B, Float relerr, std::vector<Float> &coeffs) {
+    /* Determine the required number of coefficients and allocate memory */
+    int n = expcosCoefficientCount(B, relerr);
+    coeffs.resize(n);
+
+    /* Determine the last ratio and work downwards */
+    coeffs[n-1] = modBesselRatio(B, n - 1);
+    for (int i=n-2; i>0; --i)
+        coeffs[i] = B / (2*i + B*coeffs[i+1]);
+
+    /* Evaluate the exponentially scaled I0 and correct scaling */
+    coeffs[0] = math::i0e(B) * std::exp(A+B);
+
+    /* Apply the ratios & factor of two upwards */
+    Float prod = 2*coeffs[0];
+    for (int i=1; i<n; ++i) {
+        prod *= coeffs[i];
+        if (std::abs(prod) < coeffs[0] * relerr) {
+            coeffs.erase(coeffs.begin() + i, coeffs.end());
+            break;
+        }
+        coeffs[i] = prod;
+    }
+}
+
+```
+
+=================Production Volume Rendering
+SIGGRAPH 2017 Course  
+
+Phase Function. The phase function fp„x; ω; ω0” is the angular distribution of radiance scattered and
+is usually modeled as a 1D function of the angle θ between the two directions ω and ω0. Phase functions
+need to be normalized over the sphere:  
+$$
+\int f_p(x,w,w')d\theta = 1 \qquad f_p(x,\theta) = \frac{1}{4\pi}
+$$
+Volumes that are isotropic have an equal probability of scattering incoming light in any
+direction, and have an associated phase function:  
+
+Anisotropic volumes can exhibit complicated phase functions which can be accurately modeled by
+using the Mie solution to Maxwell’s equations (Mie scattering), or by using the Rayleigh approximation.
+As an alternative to these expensive functions, in production volume rendering, the most widely used
+phase function is the Henyey-Greenstein phase function  

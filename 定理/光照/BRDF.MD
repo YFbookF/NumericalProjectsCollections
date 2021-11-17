@@ -71,3 +71,72 @@ $$
 Examples include layered materials like metals with smooth or rough coatings or fabrics,
 which are often partially retro-reflective.  可以存一个超大的4D查找表，但显然这并不是一个好主意。
 
+====================Crash Course
+
+```
+    // compute V by reflecting L across H
+    vec3 V = 2*dot(H,L)*H - L;
+
+    vec3 b = BRDF( L, V, normal, tangent, bitangent );
+
+    // apply N . L
+    if (useNDotL != 0) b *= clamp(L[2],0,1);
+
+    if (showChroma != 0) {
+        float norm = max(b[0],max(b[1],b[2]));
+        if (norm > 0) b /= norm;
+    }
+
+    // brightness
+    b *= brightness;
+
+    // exposure
+    b *= pow( 2.0, exposure );
+
+    // gamma
+    b = pow( b, vec3( 1.0 / gamma ) );
+
+    fragColor = vec4( clamp( b, vec3(0.0), vec3(1.0) ), 1.0 );
+```
+
+ eval evaluates the BRDF function for known incoming and outgoing directions
+ sample samples BRDF to return a new (outgoing) ray direction
+ pdf returns PDF of sampling given outgoing direction
+ evalIndirect combines these functions in an optimized version  
+
+BRDF大概就是算，从光源照到物体上的光线，有多大部分进入人的眼睛
+
+====================LearnOpenGL
+
+渲染方程是这么写的
+$$
+L_o(p,\omega_o) = \int\limits_{\Omega} 
+    	(k_d\frac{c}{\pi} + \frac{DFG}{4(\omega_o \cdot n)(\omega_i \cdot n)})
+    	L_i(p,\omega_i) n \cdot \omega_i  d\omega_i
+$$
+代码是这么写的
+
+```
+	for(int i = 0; i < 4; ++i) // 4就是灯光的数量
+    	vec3 numerator    = NDF * G * F; 
+        float denominator = 4 * max(dot(N, V), 0.0) * max(dot(N, L), 0.0) + 0.0001;
+        vec3 specular = numerator / denominator;
+        // add to outgoing radiance Lo
+        vec3 radiance = lightColors[i] * attenuation; // 灯光的颜色
+        Lo += (kD * albedo / PI + specular) * radiance * NdotL;  
+    }   
+    // ambient 应该就是自身的颜色
+    vec3 ambient = vec3(0.03) * albedo * ao;
+
+    vec3 color = ambient + Lo;
+
+    // HDR tonemapping
+    color = color / (color + vec3(1.0));
+    // gamma correct
+    color = pow(color, vec3(1.0/2.2)); 
+
+    FragColor = vec4(color, 1.0);
+    
+
+```
+

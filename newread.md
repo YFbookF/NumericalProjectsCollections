@@ -27,3 +27,15 @@ https://github.com/avaxman/MoebiusCode
 https://github.com/rgoldade/AdaptiveViscositySolver
 
 https://github.com/TomohikoMukai/ssdr
+
+===================CUDA
+
+https://userweb.cs.txstate.edu/~mb92/
+
+https://cs.dartmouth.edu/wjarosz/publications/georgiev19integral.html
+
+https://cgg.mff.cuni.cz/~jaroslav/papers/2019-variance-aware-mis/index.html
+
+https://cgg.mff.cuni.cz/~jaroslav/papers/2014-onlineis/index.htm
+
+https://visualcomputing.ist.ac.at/publications/2017/WWP/

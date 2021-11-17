@@ -81,3 +81,31 @@ $$
 ![image-20211114215953318](E:\mycode\collection\定理\理论力学\机器人约束\image-20211114215953318.png)
 
 ![image-20211114220114825](E:\mycode\collection\定理\理论力学\机器人约束\image-20211114220114825.png)
+
+=================Fast Implicit Simulation of Flexible Trees  
+
+我们要解的方程如下
+$$
+\begin{bmatrix} M \ddot x = f + k \\g = \overline g\end{bmatrix}
+$$
+其中k 是约束力，g是约束条件。Recall that Db is the dimension of the system’s degrees of freedom
+and Dc the dimension of the constraint viewed as a manifold in the space of degrees
+of freedom, so ∇g is a Dc × Db matrix. The Db × Db mass matrix of the system is
+denoted by M.  
+
+由于上面这个式子缺少条件，因此通常的选择是 dot x * k = 0，也就是
+$$
+\dot x \cdot k = 0 \qquad k = \nabla g^T \lambda
+$$
+lambda 是 Dc 维的，k是Db维的，因此主要要解的步骤如下
+$$
+\begin{cases} x' = x + hv' \\ v' = v + M^{-1} (hf' - h^{-1}\nabla g^T \lambda) \\ g' = \overline g\end{cases}
+$$
+上面这个步骤可以通过线性步骤解决
+$$
+\begin{bmatrix} M - h^2 \nabla f & \nabla g^T \\ \nabla g & 0\end{bmatrix}\begin{bmatrix} \delta \\ \lambda\end{bmatrix} = \begin{bmatrix} hMv + h^2 f \\ \overline g - g\end{bmatrix}
+$$
+那么最终
+$$
+\begin{cases} (M - h^2 \nabla f)\delta + \nabla g^T \lambda = hMv + h^2 f \\ \nabla g \delta = \overline g - g\end{cases}
+$$
