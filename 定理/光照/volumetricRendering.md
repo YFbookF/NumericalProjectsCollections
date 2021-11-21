@@ -610,3 +610,32 @@ const Color m_extinction;
 };
 ```
 
+==================gpu pro
+
+In reality, photons may get scattered many times before entering the eye or
+camera and contributing to the final image. This is called multi-scattering. Unfortunately, such effects are difficult and very costly to compute, so for real-time
+graphics we use a single-scattering model. In this model, atmospheric scattering contributes to the final image in two separate phenomena, in-scattering and
+out-scattering.  
+
+The algorithm consists of the following steps, run as separate passes:
+\1. estimating the density of participating media,
+\2. calculating in-scattered lighting,
+\3. ray marching,
+\4. applying the effect to shaded objects.  
+
+The main difference between direct lighting and ambient lighting is that ambient lighting contains encoded information about incoming radiance from all possible directions. Different engines and games have different ambient terms|e.g.,
+constant term, integrated cube sky lighting, or environment lighting containing
+global illumination. The main problem for calculating the in-scattering of ambient lighting is that most phase functions have only simple, directional, analytical
+forms, while ambient contribution is usually omnidirectional but nonuniform.  
+
+
+
+When light enters a cloud, the majority of the light rays spend their time refracting through water droplets and ice inside of the cloud before scattering toward
+our eyes [Van De Hulst 57]. There are three things that can happen to a photon
+entering a cloud (see also Figure 24.19):
+\1. It can be absorbed by water or non-participating particles in the cloud such
+as dust; this is extinction or absorption.
+\2. It can exit the cloud toward the eye; this is in-scattering.
+\3. It could exit the cloud traveling away from the eye; this is out-scattering.
+Beer’s law is a standard method for approximating the probability of each of
+these three outcomes.  
