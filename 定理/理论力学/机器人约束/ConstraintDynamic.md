@@ -1,5 +1,7 @@
 ===========Physically Based Modeling Constrained Dynamics  
 
+Physically Based Character Simulation  
+
 解决的问题，现在有一个点在圆上运动，它的一开始的位置和速度都是零，我们需要找到一个constraint force，来让它的加速度也是零。
 
 The idea of constrained particle dynamics is that our description of the system includes not only particles and forces, but restrictions on the way the particles are permitted to move. For example, we might constrain a particle to move along a specified curve, or require two particles to remain a specified distance apart. The problem of constrained dynamics is to make the particles obey Newton’s laws, and at the same time obey the geometric constraints.  

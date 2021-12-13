@@ -128,3 +128,15 @@ $$
 ===============Editing Fluid Animation using Flow Interpolation  
 
 ![image-20211116121518227](E:\mycode\collection\定理\连续介质力学\image-20211116121518227.png)
+
+=================https://github.com/Azmisov/snow
+$$
+J ： \R^{2\times2} = \det(\bold F) = F_{11}F_{22} - F_{21}F_{12} \\
+\frac{\partial J}{\partial \bold F}(\hat{\bold F}) = J(\hat{\bold F})\hat{\bold F}^{-T} \qquad \delta J(\hat{\bold F},\delta{\bold F}) = J(\hat{\bold F})\hat F_{ji}^{-1}\delta F_{ij}
+$$
+迹
+$$
+\frac{\partial Tr}{\partial F_{kl}}(\bold F) = \delta_{kl} \qquad \delta Tr(\hat{\bold F},\delta {\bold F}) = \delta_{kl}\delta F_{kl} = \delta F_{kk} = \delta F_{ii}
+$$
+![image-20211126130135249](E:\mycode\collection\定理\连续介质力学\image-20211126130135249.png)
+

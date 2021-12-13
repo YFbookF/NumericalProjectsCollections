@@ -29,3 +29,8 @@ updated by projecting the current configuration consecutively on
 each constraint set respecting the mass weighting. In the last step,
 the velocities are updated as vn+1 = (qn+1 - qn)=h.  
 
+==================A Survey on Position Based Dynamics, 2017  
+
+https://matthias-research.github.io/pages/tenMinutePhysics/index.html
+
+http://blog.mmacklin.com/

@@ -27,8 +27,8 @@ pos1 = np.array([1,0])
 pos2 = np.array([0,1])
 e10 = pos1 - pos0
 e20 = pos2 - pos0
-d_X = np.array([e10,e20]) # 公式1的分母
-minv = np.linalg.inv(d_X.T) # 
+d_X = np.array([[e10[0],e20[0]],[e10[1],e20[1]]]) # 公式1的分母
+minv = np.linalg.inv(d_X) # 
 
 # 形变后，物体的顶点位置
 pos0_new = np.array([0,0])
@@ -36,22 +36,16 @@ pos1_new = np.array([1,1])
 pos2_new = np.array([0,2])
 e10_new = pos1_new - pos0_new
 e20_new = pos2_new - pos0_new
-d_x = np.array([e10_new,e20_new]) # 公式1的分子
+d_x = np.array([[e10_new[0],e20_new[0]],[e10_new[1],e20_new[1]]]) # 公式1的分子
 
-F = np.dot(minv,d_x.T) # deformation Gradient
+F = np.dot(d_x,minv) # deformation Gradient
 ```
 
-不过在“Large steps in cloth simulation ”(以下称论文[1])中，衡量物体物体形变程度并非是deformation gradient，而是一个很相似的东西，w
-$$
-\bold w = \frac{(\partial \bold x)^T}{(\partial \bold X)^T}
-$$
-除了将等式右边的分子和分母都转置了一下，还初始位置的梯度减少到了二维，并改了个名字叫uv。
+不过在“Large steps in cloth simulation ”(以下称论文[1])中，也是使用了一种类似形变梯度的东西，不过将三维减少到了二维，并改了符号叫w
 $$
 \begin{bmatrix} \bold w_u & \bold w_v\end{bmatrix} = \begin{bmatrix} \Delta \bold x_1 & \Delta \bold x_2\end{bmatrix}
 \begin{bmatrix} \Delta u_1 & \Delta u_2 \\ \Delta v_1 & \Delta v_2\end{bmatrix}^{-1}
 $$
-不知道大家看懂这个公式没有？至少我第一次看的时候就没看懂，我那时候在想，如果有个能够手算的例子就好了，至少能验证我脑海中那个设想是否正确。因此我会尽量多写一些简单的能够手算的例子。
-
 首先假设一个三角形，最开始三个顶点的坐标分部是[0,0,0],[1,0,0],[0,1,0]。最开始这个三角形不应该有任何形变，所以它的三个的uv坐标是[0,0],[1,0],[0,1]。这样就能算出公式3中右边的一项了
 $$
 \begin{bmatrix} \Delta u_1 & \Delta u_2 \\ \Delta v_1 & \Delta v_2\end{bmatrix}^{-1} = \begin{bmatrix} 1 & 0 \\ 0 & 1\end{bmatrix}^{-1} = \begin{bmatrix} 1 & 0 \\ 0 & 1\end{bmatrix}
@@ -78,12 +72,6 @@ dx20 = p0 - p2
 $$
 \begin{bmatrix} \bold w_u  &\bold w_v \end{bmatrix} = \begin{bmatrix} 1  & 0 \\0  & 1 \\ 0 & 0 \end{bmatrix}
 $$
-这玩意有什么用？可以算出为了把三角形掰回正常的不形变状态，而需要的力的大小和方法。如果你足够了解形变梯度，就会发现形变梯度和w矩阵有多么相似了。
-
-不过在此之前，我们还需要定义“正常状态”是什么，参考[2]对于此处的讲解，也就是为什么要选形变梯度，为什么线弹性和neohookean模型各有优点等说得非常好。
-
-就像之前说的，一个三角形最开始的三个顶点坐标分别为[0,0,0],[1,0,0],[0,1,0]，并且一开始处于未形变状态。
-
 如果这个三角形现在的三个顶点坐标分别为[0,0,0],[1,0,0],[0,1,0]，那么它形变了吗？需要添加额外的力把它拉回初始状态吗？显然不需要，因为三个顶点就在原来的位置。
 
 如果这个三角形现在的三个顶点坐标分别为[1,1,0],[2,1,0],[1,2,0]，那么它仅仅是位移了，没形变。同样不应该添加任何力。
@@ -124,7 +112,7 @@ $$
 $$
 \frac{\partial \Delta\bold x_1}{\partial \bold x_1} = \bold I \qquad \frac{\partial \Delta\bold x_1}{\partial \bold x_0} = -\bold I
 $$
-I是单位矩阵。condition由w构成，而w由顶点位置x构成，所以求导很简单。在一个非常棒的开源库vegafem中的clothBW.cpp中，它是这么计算的
+I是单位矩阵。condition由w构成，而w由顶点位置x构成，所以求导很简单。在一个非常棒的开源库vegafem中的clothBW.cpp中(https://github.com/starseeker/VegaFEM/blob/master/libraries/clothBW/clothBW.cpp)，它是这么计算的
 
 ```
 ClothBW::WuvInfo ClothBW::ComputeWuvInfo(const double triangleUV[6])
@@ -152,7 +140,7 @@ ClothBW::WuvInfo ClothBW::ComputeWuvInfo(const double triangleUV[6])
 }
 ```
 
-vegaFem是一个开源的有限元库，里面集成了很多论文的算法，在4.0版本中也包括参考[1]，下载地址为http://barbic.usc.edu/vega/download.html。github上的哪个vegafem版本为2.0。当然，在笔者本人的代码中是这么写的，用了Eigen库。
+vegaFem是一个开源的有限元库，里面集成了很多论文的算法，在4.0版本中也包括参考[1]，下载地址为http://barbic.usc.edu/vega/download.html。当然，在笔者本人的代码中是这么写的，用了Eigen库。
 
 ```
 duv10 = uv1 - uv0;
@@ -210,7 +198,7 @@ forces.segment<3>(3 * m_inds[2]) -= k * (q.C0 * q.dC0dP2 + q.C1 * q.dC1dP2);
 
 然而只算出力，只能算显式步骤，我们之后还要让力对顶点位置和顶点速度求导，才能算出隐式步骤。不过这个之后再说。
 
-怎么样，和弹簧质点中的stretch中很不一样吧？如果你还不理解为什么可以由形变梯度算出能量，能量又是怎么和力扯上关系的，那么你需要多阅读一些有限元的书籍和代码，比如尽量把这个维基里的每个词都弄懂https://en.wikipedia.org/wiki/Finite_strain_theory，我弄懂的方法主要是看代码然后纸笔推演了。
+怎么样，和弹簧质点中的stretch中很不一样吧？如果你还不理解为什么可以由形变梯度算出能量，能量又是怎么和力扯上关系的，那么你需要多了解有关连续介质力学的知识【又是一个大坑】。
 
 ## Shear
 
@@ -247,7 +235,7 @@ forces.segment<3>(idx2 * 3) += -k_shear * Shear * dcdx2;
 
 我们前两个力并不复杂，因为第三个bend力推导能推几页纸qwq。所以bend才是我们的大boss。
 
-为了快速获取正反馈，我们先用显式方法，把两个力加上去。到这里为止的代码文件为step01。不过你想把这个工程运行起来也是需要一番魄力的，因为我用了freeglut,glew库，以及数学运算库eigen。【所以像taichi这样可以一键运行的真是yyds】
+为了快速获取正反馈，我们先用显式方法，把两个力加上去。到这里为止的代码文件为step01。https://github.com/clatterrr/ClothSimulationCollections/tree/master/LargeSteps/Step01。
 
 ## 阻尼
 
@@ -287,6 +275,8 @@ forces.segment<3>(idx2 * 3) += -damping_shear * dcdt * dcdx2;
 至此的代码文件为Step02。
 
 ## 隐式步骤
+
+注意这篇论文中使用的隐式步骤很复杂，实际上可以使用更简单的一阶欧拉隐式。但是这里还是详细介绍本篇的隐式步骤。接下来公式巨多，且目前在2021年并不实用，不过对矩阵和向量求导的几步值得看看。
 
 广义动力学公式如下
 $$
@@ -386,25 +376,7 @@ df2dv1 = -damping_stretch * (dcudx2 * dcudx1.transpose() + dcvdx2 * dcvdx1.trans
 df2dv2 = -damping_stretch * (dcudx2 * dcudx2.transpose() + dcvdx2 * dcvdx2.transpose());
 ```
 
-dfdx和dfdv都算出来了，接下来解线性方程组就像了。可以简单求逆，但是lhs也就是K矩阵是个稀疏矩阵，求逆显然不划算。因此我们可以使用共轭梯度。
-
-之所以说K是稀疏矩阵，是因为在我们的网格编排中，如果只考虑Stretch和Shear，那么一个结点最多之和除自己之外的6个结点有关，例如在下面的三角形网格中，只和左上，右下，上，下，左，右这6个结点有关系，因为只有这些结点与中心点共享了一个三角形。这意味在K每行的node_num乘3列中，最多只有7乘3列有数字，其它列全是零。
-
-至于K是对称，当然是因为力的相互作用原理了。
-
-K是稀疏矩阵，所以我们显然不可能以稠密矩阵的方式存它，不然太浪费空间了。
-
-可以直接使用Eigen库的库方法存稀疏矩阵，之后求解也方便。
-
-自己写一个标准的稀疏矩阵处理程序，可参考bridson的
-
-笔者自己用的是另一种，既然K最多只有21列，并且编号和相对位置是固定的，那我直接把这21列存下了。比较方便。这种方法在taichi库的cg_poisson.py也能见到。
-
-## 共轭梯度
-
-共轭梯度请看这篇。这篇论文用了Modified Precondition Conjugate Gradient，笔者只实现了Conjugate Gradient。
-
-至此的代码的文件可见
+dfdx和dfdv都算出来了，接下来解线性方程组就行了。可以简单求逆，但是lhs也就是K矩阵是个稀疏矩阵，求逆显然不划算。因此我们可以使用共轭梯度。
 
 ## Bend
 
@@ -664,7 +636,7 @@ $$
 
 假如p1移动了一个向量a，我们先让这个这个向量点积点p0的binormal，毕竟如果往别的方向移动的话，是不会增加d00的长度的。
 
-![image-20210906234113096](D:\图形学书籍\系列流体文章\gif\image-20210906234113096.png)
+![image-20211128185258683](E:\mycode\collection\教程\17Large\image-20211128185258683.png)
 
 现在已经求出了蓝色虚线的长度，也就是向量a点积binormal的结果，那么与蓝色虚线平行的橙色虚线的长度是多少？那么这样求相似三角形就可以了。很显然，蓝色虚线的长度比橙色虚线的长度，等于d01比图中红色实线的长度，而后者可通过d00乘以cos(角021)求出来，那么就得到了下面这个式子
 $$
@@ -751,13 +723,7 @@ d2ThetadP0dP3 = -dn0dP3 / d00 + n0 * dd00dP3.transpose() / (d00 * d00);
 
 ```
 
-至此，算dfdx和dfdv和force的组件都已经计算完毕，然后组装矩阵即可。
-
-之后只需要亿点点优化和亿点点渲染技巧可以生成漂亮的布料的模拟了。不过我在此时已经打空了大半的血槽，需要好好休息一下了。
-
-### 总结
-
-虽然这种效果现在来看并不惊艳了，但是其中的处理拉伸，剪切，弯曲的算法还是很值得一看。另一个值得一看是隐式求解步骤。
+至此，算dfdx和dfdv和force的组件都已经计算完毕，然后组装矩阵即可。虽然这种效果现在来看并不惊艳了，但是其中的处理拉伸，剪切，弯曲的算法还是很值得一看。
 
 ### 参考
 
@@ -766,7 +732,3 @@ d2ThetadP0dP3 = -dn0dP3 / d00 + n0 * dd00dP3.transpose() / (d00 * d00);
 [2]"Dynamic Deformables:Implementation and ProductionPracticalities  "
 
 [3]vegafem
-
-[4]clothsim
-
-[5]bend
