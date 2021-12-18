@@ -1,6 +1,6 @@
 ================A Finite Element Method for Animating Large Viscoplastic Flow  
 
-![image-20211029131647789](D:\定理\有限元\image-20211029131647789.png)
+![image-20211029131647789](E:\mycode\collection\定理\有限元\image-20211029131647789.png)
 
 =================Robust Quasistatic Finite Elements and Flesh Simulation  
 
@@ -50,18 +50,18 @@ $$
 $$
 \frac{\partial \bold P}{\partial \bold F_{ij}} = \frac{\partial \bold U}{\partial \bold F_{ij}}\bold P(\hat{\bold F})\bold V^T + \bold U\frac{\partial \bold P(\hat{\bold F})}{\partial \bold F_{ij}}\bold V^T + \bold U\bold P(\hat{\bold F})\frac{\partial \bold V^T}{\partial \bold F_{ij}}
 $$
-![image-20211030094627933](D:\定理\有限元\image-20211030094627933.png)
+![image-20211030094627933](E:\mycode\collection\定理\有限元\image-20211030094627933.png)
 
-![image-20211030094816105](D:\定理\有限元\image-20211030094816105.png)
+![image-20211030094816105](E:\mycode\collection\定理\有限元\image-20211030094816105.png)
 
 话说lambda是个什么？，应该是the strain energy may be expressed in terms of the invariants
 
-![image-20211030095321449](D:\定理\有限元\image-20211030095321449.png)
+![image-20211030095321449](E:\mycode\collection\定理\有限元\image-20211030095321449.png)
 $$
 I_c = \trace(\bold C) = \lambda_1^2 + \lambda_2^2 + \lambda_3^2 \qquad III_C = \det(\bold C) = \lambda_1^2\lambda_2^2\lambda_3^2 \\
 II_C = \bold C :\bold C = \lambda_1^4 + \lambda_2^4 + \lambda_3^4
 $$
-![image-20211030095030173](D:\定理\有限元\image-20211030095030173.png)
+![image-20211030095030173](E:\mycode\collection\定理\有限元\image-20211030095030173.png)
 $$
 \bold P(\hat{\bold F}) = diag(\frac{\partial \Psi}{\partial \lambda_1},\frac{\partial \Psi}{\partial \lambda_2},\frac{\partial \Psi}{\partial \lambda_3})
 $$
@@ -71,5 +71,5 @@ $$
 $$
 Generally, a hyperelastic material model should satisfy the Hill’s stability criterion (also called Drucker’s condition), which requires a monotonic increase of strain energy density with increase in strain   
 
-![image-20211030100509375](D:\定理\有限元\image-20211030100509375.png)
+![image-20211030100509375](E:\mycode\collection\定理\有限元\image-20211030100509375.png)
 

@@ -94,7 +94,7 @@ $$
 $$
 =====================Position-Based Simulation of Continuous Materials  
 
-![image-20211029135455817](D:\定理\弹性力学\image-20211029135455817.png)
+![image-20211029135455817](E:\mycode\collection\定理\弹性力学\image-20211029135455817.png)
 
 =====================连续介质力学基础
 
@@ -163,5 +163,5 @@ rigid-body rotation. I
 
 ========A FINITE STRAIN BEAM FORMULATION. THE THREE-DIMENSIONAL  
 
-![image-20211026142917603](D:\定理\弹性力学\image-20211026142917603.png)
+![image-20211026142917603](E:\mycode\collection\定理\弹性力学\image-20211026142917603.png)
 

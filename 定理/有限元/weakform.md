@@ -26,6 +26,6 @@ $$
 $$
 \bold E = \frac{1}{2\mu}(\bold S - \frac{\lambda}{2\mu + 3\lambda}(tr\bold S)\bold I)
 $$
-![image-20211026192918383](D:\定理\有限元\image-20211026192918383.png)
+![image-20211026192918383](E:\mycode\collection\定理\有限元\image-20211026192918383.png)
 
-![image-20211026192954297](D:\定理\有限元\image-20211026192954297.png)
+![image-20211026192954297](E:\mycode\collection\定理\有限元\image-20211026192954297.png)

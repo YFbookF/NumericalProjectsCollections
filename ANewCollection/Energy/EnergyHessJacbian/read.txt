@@ -1,0 +1,15 @@
+mfem
+
+TheConstitution
+
+AFEM
+
+chrono
+
+physika
+
+bartels
+
+https://github.com/Victorlouisdg/cloth-manipulation
+
+akantu
