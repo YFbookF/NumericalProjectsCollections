@@ -42,4 +42,25 @@ multisurface
 
 
 
-# 
+# D:\图形学书籍\图形学书籍\固体物理\Computational Continuum Mechanics by Ahmed A. Shabana (z-lib.org).pdf
+
+![image-20211220102405376](E:\mycode\collection\定理\弹性力学\image-20211220102405376.png)
+
+![image-20211220102538969](E:\mycode\collection\定理\弹性力学\image-20211220102538969.png)
+
+===========================chrono
+
+```
+void ChContinuumPlasticVonMises::ComputePlasticStrainFlow(ChStrainTensor<>& mplasticstrainflow,
+                                                          const ChStrainTensor<>& mtotstrain) const {
+    double vonm = mtotstrain.GetEquivalentVonMises();
+    if (vonm > this->elastic_yeld) {
+        ChVoightTensor<> mdev;
+        mtotstrain.GetDeviatoricPart(mdev);
+        mplasticstrainflow = mdev * ((vonm - this->elastic_yeld) / (vonm));
+    } else {
+        mplasticstrainflow.setZero();
+    }
+}
+```
+

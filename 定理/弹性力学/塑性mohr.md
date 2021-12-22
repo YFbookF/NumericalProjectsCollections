@@ -248,3 +248,14 @@ void ChContinuumDruckerPrager::Set_from_MohrCoulomb(double phi, double cohesion,
             mplasticstrainflow *= inner_up(0) / inner_dw(0);
 ```
 
+=======================
+
+D:\图形学书籍\论文\Anisotropic Elastoplasticity for Cloth, Knit and Hair Frictional Contact.pdf
+
+![image-20211221224647829](E:\mycode\collection\定理\弹性力学\image-20211221224647829.png)
+
+============================
+
+D:\图形学书籍\图形学书籍\Siggraph\misc\Animating Sand as a Fluid.pdf
+
+![image-20211221233500961](E:\mycode\collection\定理\弹性力学\image-20211221233500961.png)

@@ -1,0 +1,6 @@
+Introduction
+In the case of realistic elastic object simulation is that, in simple terms, the object does not want to deform. If an external force deforms the object, then the external force will be transformed into the energy of the object itself, which is stored inside the object. A more professional term is internal energy or strain energy. If the force does not continue to work, the elastic object will use this energy to change itself back to the original state.
+
+Therefore, the main step of the simulation is to first calculate the degree of deformation of the object, then calculate the total energy from the degree of deformation of the object, and then derive the total energy to calculate the force of each vertex, and then use this force to update the speed, and then use the speed. To update the location.
+
+I found that the most effective way to learn this kind of numerical calculation is to use hand calculation examples. For example, for a two-dimensional triangle, the initial coordinates of the three vertices are

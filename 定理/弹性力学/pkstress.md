@@ -165,3 +165,10 @@ rigid-body rotation. I
 
 ![image-20211026142917603](E:\mycode\collection\定理\弹性力学\image-20211026142917603.png)
 
+D:\图形学书籍\图形学书籍\有限元\非线性专项\Nonlinear Continuum Mechanics for Finite Element Analysis, 2nd Edition by Javier Bonet, Richard D. Wood (z-lib.org).pdf
+
+![image-20211220090347367](E:\mycode\collection\定理\弹性力学\image-20211220090347367.png)
+
+![image-20211220094309312](E:\mycode\collection\定理\弹性力学\image-20211220094309312.png)
+
+![image-20211220094335451](E:\mycode\collection\定理\弹性力学\image-20211220094335451.png)

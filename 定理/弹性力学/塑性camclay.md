@@ -82,3 +82,20 @@ NonAssociativeCamClay<T>::NonAssociativeCamClay(T logJp, T friction_angle, T bet
 
 ```
 
+===================suanpan-dev
+
+```
+		residual(0) = rel_p * rel_p / square_b + square_qm - a * a;
+
+		if(1 == counter && residual(0) < 0.) return SUANPAN_SUCCESS;
+
+		residual(1) = incre_alpha - 2. * gamma / square_b * rel_p;
+
+		jacobian(0, 0) = -2. * six_shear / denom * square_qm;
+		jacobian(1, 0) = -2. * rel_p / square_b;
+		jacobian(0, 1) = jacobian(1, 0) * (bulk - da) - 2. * a * da;
+		jacobian(1, 1) = 1. - 2. * gamma / square_b * (da - bulk);
+
+		if(!solve(incre, jacobian, residual, solve_opts::equilibrate)) return SUANPAN_FAIL;
+```
+

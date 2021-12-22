@@ -375,3 +375,34 @@ void ChContinuumDruckerPrager::ComputePlasticStrainFlow(ChStrainTensor<>& mplast
 }
 ```
 
+=======================suanpan-dev
+
+```
+	if(sqrt_j2 >= shear * gamma) {
+		const auto norm_s = tensor::stress::norm(dev_stress);
+
+		const auto t_factor = shear / sqrt_j2 * gamma;
+
+		trial_stress -= t_factor * dev_stress + bulk * eta_flow * gamma * tensor::unit_tensor2;
+
+		trial_stiffness += double_shear * (t_factor - shear / denominator) / norm_s / norm_s * dev_stress * dev_stress.t() - double_shear * t_factor * unit_dev_tensor - factor_d / denominator * unit_x_unit;
+
+		const mat t_mat = eta_yield * factor_c / denominator / norm_s * dev_stress * tensor::unit_tensor2.t();
+
+		associated ? trial_stiffness -= t_mat + t_mat.t() : trial_stiffness -= t_mat + eta_flow / eta_yield * t_mat.t();
+	}
+	else {
+		// apex return
+		gamma = 0.; // volumetric strain reuse variable
+		plastic_strain = current_history(0);
+
+		counter = 0;
+		while(++counter < max_iteration) {
+			const auto residual = compute_c(plastic_strain) * xi / eta_flow - hydro_stress + bulk * gamma;
+			const auto incre_gamma = residual / (denominator = factor_b * compute_dc(plastic_strain) + bulk);
+			suanpan_extra_debug("NonlinearDruckerPrager local iterative loop error: %.5E.\n", incre_gamma);
+			if(fabs(incre_gamma) <= tolerance) break;
+			plastic_strain = current_history(0) + xi / eta_yield * (gamma -= incre_gamma);
+		}
+```
+
