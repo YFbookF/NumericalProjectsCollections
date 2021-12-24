@@ -1,10 +1,10 @@
 =======strain based dynamics
 
-![image-20211030135004871](D:\定理\模拟技巧.md\image-20211030135004871.png)
+![image-20211030135004871](E:\mycode\collection\定理\模拟技巧\image-20211030135004871.png)
 
 那么
 
-![image-20211030135107222](D:\定理\模拟技巧.md\image-20211030135107222.png)
+![image-20211030135107222](E:\mycode\collection\定理\模拟技巧\image-20211030135107222.png)
 
 Hierarchical Position Based Dynamics  
 
@@ -34,3 +34,4 @@ the velocities are updated as vn+1 = (qn+1 - qn)=h.
 https://matthias-research.github.io/pages/tenMinutePhysics/index.html
 
 http://blog.mmacklin.com/
+

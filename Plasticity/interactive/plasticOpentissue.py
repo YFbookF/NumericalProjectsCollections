@@ -54,6 +54,10 @@ while time < timeFinal:
     d17 = nu * d15
     d18 = young / 2 / (1 + nu)
     Kemat = np.zeros((12,12))
+    
+    D_0 = d16
+    D_1 = d17
+    D_2 = d18
     for i in range(4):
         for j in range(4):
             idx = i * 3
